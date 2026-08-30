@@ -6,7 +6,7 @@
 - [ ] Confirmar que la raíz del repositorio será `Mapa Urbano` y no `/home/joaquin`.
 - [ ] Definir ciudad, área operativa y sistema de coordenadas de trabajo.
 - [ ] Elegir proveedor de PostgreSQL administrado con PostGIS.
-- [ ] Elegir proveedor S3-compatible y política de privacidad de fotografías.
+- [ ] Definir capacidad de PostgreSQL, límite de imágenes y política de privacidad/retención.
 - [ ] Elegir SDK de mapas para Android y proveedor de tiles.
 - [ ] Confirmar estados, categorías y textos visibles.
 - [ ] Confirmar equipos iniciales, responsables, permisos y reglas de reasignación.
@@ -21,7 +21,7 @@
 3. Configurar Ktor, Docker, health checks y configuración segura.
 4. Crear migraciones PostgreSQL/PostGIS y seeds.
 5. Implementar el flujo de alta y consulta pública.
-6. Integrar S3 y attachments.
+6. Integrar `report_images` y el endpoint binario.
 7. Implementar autenticación y API administrativa.
 8. Implementar asignación, prioridad e historial administrativo.
 9. Construir el panel Angular y servir sus assets compilados desde Ktor.
@@ -37,7 +37,7 @@
 - [ ] PostgreSQL tiene PostGIS, tablas obligatorias, índices y categorías iniciales.
 - [ ] Un reporte puede crearse con ubicación y estado `pending`.
 - [ ] El código de seguimiento no expone el ID ni datos personales.
-- [ ] Una fotografía válida termina en S3 y sus metadatos en `attachments`.
+- [ ] Una fotografía válida termina en `report_images.data` con MIME, tamaño, checksum y dimensiones coherentes.
 - [ ] El administrador puede iniciar sesión y cambiar el estado.
 - [ ] El administrador puede asignar, reasignar y priorizar un reporte sin perder historial.
 - [ ] Cada cambio genera historial y auditoría.

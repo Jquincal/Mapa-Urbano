@@ -44,13 +44,15 @@ Este registro evita volver a discutir decisiones ya tomadas. Las decisiones abie
 
 ## ADR-005 — Fotografías en S3-compatible
 
-**Estado:** Aprobada.
+**Estado:** Reemplazada por ADR-010.
 
 **Decisión:** Guardar archivos en un bucket privado compatible con S3 y solo metadatos en PostgreSQL.
 
 **Motivo:** Evita inflar backups de la base y permite políticas de ciclo de vida independientes.
 
 **Consecuencia:** El backend necesita manejar fallos entre la subida y la transacción, además de URLs firmadas y limpieza de objetos huérfanos.
+
+Esta decisión se conserva como registro histórico y no debe implementarse en el MVP actual.
 
 ## ADR-006 — Código de seguimiento como bearer token
 
@@ -91,3 +93,13 @@ Este registro evita volver a discutir decisiones ya tomadas. Las decisiones abie
 **Motivo:** La vista administrativa necesita convertir reportes visibles en una cola de trabajo operativa. Sin responsable ni orden explícito, el municipio puede observar problemas pero no coordinar su atención.
 
 **Consecuencia:** El backend incorpora un módulo `assignments`, historial de asignaciones y prioridad, control de concurrencia y permisos específicos. El MVP no incluye asignación automática, optimización de recorridos ni balanceo inteligente de carga.
+
+## ADR-010 — Imágenes almacenadas en PostgreSQL
+
+**Estado:** Aprobada.
+
+**Decisión:** Guardar el binario de cada fotografía en `report_images.data BYTEA`, junto con MIME, tamaño, dimensiones, checksum y fecha. El MVP admite como máximo una imagen de 5 MB por reporte.
+
+**Motivo:** El proyecto requiere que la base de datos contenga las imágenes. Para el alcance inicial, una única transacción y un único mecanismo de backup simplifican consistencia y recuperación.
+
+**Consecuencia:** Los listados nunca seleccionan la columna binaria, las imágenes se entregan desde endpoints dedicados y los backups incluyen evidencia fotográfica. Se deben medir crecimiento, I/O y restauración. Si el volumen futuro supera los límites operativos, una nueva ADR podrá introducir almacenamiento de objetos detrás del mismo módulo `media`.

@@ -1,12 +1,14 @@
 # Modelo de datos y PostGIS
 
+El modelo detallado y un DDL inicial de referencia están en [12-entidades-bd-ejemplo.md](12-entidades-bd-ejemplo.md).
+
 ## Principios
 
 - PostgreSQL es la fuente de verdad transaccional.
 - PostGIS almacena la ubicación como un punto `geography(Point, 4326)`.
 - Los nombres físicos usan `snake_case` y están en inglés para mantener consistencia con los módulos Kotlin.
 - Las fechas se guardan como `timestamptz` en UTC.
-- Las fotografías se guardan fuera de la base; PostgreSQL conserva metadatos y referencia al objeto.
+- Las fotografías se guardan en PostgreSQL como `BYTEA`; la misma fila conserva metadatos, checksum y dimensiones.
 - Las claves públicas preferidas son UUID para evitar enumeración trivial de reportes.
 
 ## Modelo lógico
@@ -14,7 +16,7 @@
 ```mermaid
 erDiagram
     CATEGORIES ||--o{ REPORTS : classifies
-    REPORTS ||--o{ ATTACHMENTS : contains
+    REPORTS ||--o| REPORT_IMAGES : contains
     REPORTS ||--o{ REPORT_STATUS_HISTORY : records
     REPORTS ||--o{ REPORT_ASSIGNMENTS : receives
     REPORTS ||--o{ REPORT_PRIORITY_HISTORY : records
@@ -50,12 +52,14 @@ erDiagram
         timestamptz updated_at
         timestamptz deleted_at
     }
-    ATTACHMENTS {
+    REPORT_IMAGES {
         uuid id PK
         uuid report_id FK
-        text object_key UK
+        bytea data
         varchar content_type
         bigint size_bytes
+        int width_px
+        int height_px
         varchar original_filename
         varchar checksum_sha256
         timestamptz created_at
@@ -203,18 +207,31 @@ Una asignación activa debe indicar equipo, responsable o ambos. Cuando ambos es
 | `from_due_at` / `to_due_at` | TIMESTAMPTZ | Conservan el cambio de fecha objetivo. |
 | `changed_at` | TIMESTAMPTZ | UTC. |
 
-### `attachments`
+### `report_images`
 
 | Campo | Tipo | Reglas |
 |---|---|---|
 | `id` | UUID | PK. |
-| `report_id` | UUID | FK a `reports`. |
-| `object_key` | TEXT | Único; referencia al objeto privado en S3. |
-| `content_type` | VARCHAR(100) | Resultado de validación del contenido. |
-| `size_bytes` | BIGINT | Entre 1 y 5 MB para el MVP. |
-| `original_filename` | VARCHAR(255) | Solo informativo; no se usa para construir rutas. |
-| `checksum_sha256` | CHAR(64) | Integridad y deduplicación opcional. |
+| `report_id` | UUID | FK a `reports`; `ON DELETE CASCADE` si la política permite borrar el reporte. |
+| `data` | BYTEA | Binario validado; nunca Base64 ni incluido en listados JSON. |
+| `content_type` | VARCHAR(100) | `image/jpeg`, `image/png` o `image/webp`. |
+| `size_bytes` | BIGINT | Entre 1 y 5 MB; debe coincidir con `octet_length(data)`. |
+| `width_px` | INTEGER | Ancho positivo dentro del límite aprobado. |
+| `height_px` | INTEGER | Alto positivo dentro del límite aprobado. |
+| `original_filename` | VARCHAR(255) | Opcional e informativo; no se usa para resolver el recurso. |
+| `checksum_sha256` | CHAR(64) | Integridad y ETag; no reemplaza la validación de contenido. |
 | `created_at` | TIMESTAMPTZ | UTC. |
+
+Para el MVP se crea una restricción única sobre `report_id`, porque cada reporte admite como máximo una imagen. Si más adelante se permiten varias, se reemplaza por un campo `sort_order` y un límite de negocio.
+
+### Estrategia de almacenamiento binario
+
+- PostgreSQL administrará el almacenamiento interno mediante TOAST; la aplicación no depende de su representación física.
+- Los repositorios de listado seleccionan columnas explícitas y nunca incluyen `data`.
+- El binario se consulta por ID mediante una operación dedicada y autorización previa.
+- `CHECK (size_bytes = octet_length(data))` evita divergencias entre metadatos y contenido.
+- Los backups, réplicas y restauraciones incluyen las imágenes; capacidad, I/O y tiempos de recuperación deben medirse con datos representativos.
+- No se crean índices sobre `data`. Se indexan `report_id`, `checksum_sha256` y `created_at` solo cuando una consulta real lo justifique.
 
 ### `categories`
 
@@ -236,7 +253,7 @@ La arquitectura también requiere estas tablas o equivalentes:
 - `outbox_events`: opcional, para publicar eventos confiablemente después del commit.
 - `notification_events`: opcional en el MVP; útil cuando se agreguen push o email.
 
-Las tablas `reports`, `admin_users`, `report_status_history`, `attachments`, `categories`, `teams`, `team_members`, `report_assignments` y `report_priority_history` son obligatorias desde la primera migración funcional.
+Las tablas `reports`, `report_images`, `admin_users`, `report_status_history`, `categories`, `teams`, `team_members`, `report_assignments` y `report_priority_history` son obligatorias desde la primera migración funcional.
 
 ## Restricciones e índices
 
@@ -249,6 +266,8 @@ Antes de implementar migraciones se deben fijar las restricciones equivalentes a
 | Índice sobre `reports.priority, reports.due_at` | Cola operativa por urgencia y vencimiento. |
 | Índice sobre `reports.category_id, reports.created_at` | Filtro por categoría. |
 | Índice único sobre `reports.tracking_code_hash` | Búsqueda de seguimiento sin duplicados. |
+| Índice único sobre `report_images.report_id` | Una imagen como máximo por reporte en el MVP. |
+| Índice sobre `report_images.checksum_sha256` | Verificación y diagnóstico de integridad sin consultar el binario. |
 | Índice sobre `report_status_history.report_id, changed_at` | Línea de tiempo del reporte. |
 | Índice único parcial sobre `report_assignments.report_id` con `unassigned_at IS NULL` | Una sola asignación activa por reporte. |
 | Índice sobre `report_assignments.team_id, responsible_admin_user_id` | Filtros por equipo y responsable. |

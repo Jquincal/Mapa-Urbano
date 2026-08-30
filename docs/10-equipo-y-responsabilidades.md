@@ -9,7 +9,7 @@ Este documento define qué debe conocer cada integrante, qué entregables conduc
 Todo el equipo debe comprender, como mínimo:
 
 - Objetivo del producto, usuarios, alcance del MVP y flujos ciudadano/administrativo.
-- Arquitectura Android + Angular + Ktor + PostgreSQL/PostGIS + S3.
+- Arquitectura Android + Angular + Ktor + PostgreSQL/PostGIS, incluidas imágenes `BYTEA`.
 - Flujo básico de Git, pull requests, revisión y resolución de conflictos simples.
 - Fundamentos de HTTP, JSON, códigos de estado y contrato de API.
 - Uso local de Docker, variables de entorno y separación de secretos.
@@ -67,7 +67,7 @@ Apoyo principal: Mauro en Android y operación; Juan en backend; Aldana en datos
 - Fundación Ktor modular.
 - API pública y administrativa.
 - Autenticación, permisos y auditoría.
-- Integración S3 y WebSocket.
+- Persistencia/entrega de imágenes y WebSocket.
 - Suite de pruebas backend.
 
 Apoyo principal: Aldana en persistencia, Joaquín en arquitectura y seguridad, Santi/Mauro en pruebas desde clientes.
@@ -77,6 +77,7 @@ Apoyo principal: Aldana en persistencia, Joaquín en arquitectura y seguridad, S
 ### Debe dominar
 
 - PostgreSQL: tipos, restricciones, índices, transacciones y `EXPLAIN`.
+- Almacenamiento `BYTEA`, TOAST, impacto en I/O, capacidad y restauración.
 - PostGIS: `geography(Point, 4326)`, GIST, bounding box y distancias.
 - Migraciones Flyway, seeds idempotentes y compatibilidad entre versiones.
 - Historial, auditoría, borrado lógico, retención, backup y restauración.
@@ -112,7 +113,7 @@ Apoyo principal: Juan en repositorios, Mauro en servicios locales y restauració
 
 ### Responsabilidades
 
-- Convertir el prototipo actual en una arquitectura Angular por funcionalidades.
+- Crear el proyecto Angular y organizarlo por funcionalidades a partir de los contratos aprobados.
 - Implementar shell, sesión, rutas, servicios tipados y manejo de errores.
 - Construir dashboard, reportes, detalle, delegación, prioridades, métricas y equipos.
 - Integrar API real y WebSocket con resincronización REST.

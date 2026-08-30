@@ -1,22 +1,17 @@
 # admin-web
 
-Directorio reservado para el panel web administrativo.
+Directorio reservado para el futuro panel web administrativo.
 
-El panel se implementará con Angular y TypeScript, usando componentes standalone, Angular Router, `HttpClient`, Signals/RxJS y Leaflet.
+La base Angular de demostración fue retirada del repositorio para que el equipo inicie la implementación sobre contratos y decisiones aprobadas, sin heredar código de prototipo.
 
-El proyecto tendrá `package.json` y utilizará Node.js/npm únicamente durante el desarrollo y la compilación. Node.js no será necesario como runtime de producción: Ktor servirá el contenido compilado bajo `/admin` desde el mismo despliegue del backend.
+Cuando comience el desarrollo, el panel se creará con Angular y TypeScript en una rama `feat/*`, usando componentes standalone, Angular Router, `HttpClient`, Signals/RxJS y Leaflet.
 
-## Vista previa navegable
+Node.js/npm se usarán únicamente durante desarrollo y compilación. En producción, Ktor servirá los archivos estáticos bajo `/admin`; Node.js no será parte del runtime final.
 
-La primera vista completa del panel ya está implementada con datos simulados. Incluye dashboard, mapa, reportes, delegación, prioridades, estadísticas, configuración, auditoría y detalle lateral del reporte.
+Antes de generar el proyecto se deben cerrar:
 
-```bash
-npm install
-npm start
-```
-
-La aplicación queda disponible en `http://localhost:4200`. Para generar los archivos estáticos de producción:
-
-```bash
-npm run build
-```
+- Versión de Angular y Node.js soportadas.
+- Contrato inicial de autenticación y reportes.
+- Estructura `core`, `shared` y `features`.
+- Estrategia de testing y accesibilidad.
+- Configuración de entornos sin secretos versionados.

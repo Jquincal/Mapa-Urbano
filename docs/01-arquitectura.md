@@ -4,7 +4,7 @@
 
 Mapa Urbano será un monolito modular. Un único proceso Kotlin + Ktor contiene los módulos de negocio, expone la API REST, mantiene las conexiones WebSocket y sirve los archivos estáticos del panel web.
 
-Android y el panel administrativo consumen el mismo backend. La base de datos PostgreSQL + PostGIS y el almacenamiento de fotografías son servicios externos al proceso, pero forman parte de la plataforma.
+Android y el panel administrativo consumen el mismo backend. PostgreSQL + PostGIS es un servicio externo al proceso y almacena tanto los datos estructurados como las fotografías binarias.
 
 ## Vista de contexto
 
@@ -14,8 +14,7 @@ flowchart LR
     M[Administrador municipal] --> W[Panel web<br/>Angular + TypeScript + Leaflet]
     A -->|HTTPS REST / WSS| K[Backend central<br/>Kotlin + Ktor]
     W -->|mismo origen<br/>HTTPS REST / WSS| K
-    K --> P[(PostgreSQL + PostGIS)]
-    K --> S[(S3-compatible<br/>fotografías)]
+    K --> P[(PostgreSQL + PostGIS<br/>datos e imágenes BYTEA)]
     K --> O[Logs y métricas]
 ```
 
@@ -32,7 +31,7 @@ Aplicación: casos de uso y transacciones
         ↓
 Dominio: entidades, estados y reglas
         ↓
-Infraestructura: repositorios, PostGIS, S3 y eventos
+Infraestructura: repositorios, PostGIS, almacenamiento binario y eventos
 ```
 
 ### Reglas de dependencia
@@ -40,7 +39,7 @@ Infraestructura: repositorios, PostGIS, S3 y eventos
 - `api` puede depender de `application` y de contratos compartidos.
 - `application` puede depender de `domain` y de puertos definidos por el módulo.
 - `infrastructure` implementa puertos; no define reglas de negocio.
-- `domain` no depende de Ktor, SQL, S3 ni clases de Android.
+- `domain` no depende de Ktor, SQL ni clases de Android.
 - `shared` contiene errores, reloj, identificadores, paginación y observabilidad transversal.
 - Un módulo no consulta las tablas de otro módulo sin pasar por un contrato explícito.
 
@@ -55,7 +54,7 @@ backend-ktor/
     ├── reports/               # Alta, consulta, detalle y ciclo de vida
     ├── assignments/           # Equipos, responsables y delegación operativa
     ├── categories/            # Catálogo de categorías
-    ├── media/                 # Validación y S3 de fotografías
+    ├── media/                 # Validación y persistencia de fotografías
     ├── statistics/            # Agregaciones para el panel
     ├── notifications/         # Publicación y suscripción de eventos en tiempo real
     └── audit/                 # Registro inmutable de acciones relevantes
@@ -72,7 +71,6 @@ sequenceDiagram
     actor Vecino
     participant Android
     participant Ktor
-    participant S3
     participant DB as PostgreSQL/PostGIS
     participant WS as Suscriptores WebSocket
 
@@ -80,15 +78,15 @@ sequenceDiagram
     Android->>Ktor: POST /api/v1/reports (multipart)
     Ktor->>Ktor: Valida campos, ubicación y fotografía
     Ktor->>Ktor: Genera código opaco y calcula hash
-    Ktor->>S3: Sube fotografía, si existe
-    Ktor->>DB: Inserta reporte + attachment en una transacción
+    Ktor->>Ktor: Valida y normaliza fotografía, si existe
+    Ktor->>DB: Inserta reporte + report_image en una transacción
     DB-->>Ktor: Commit confirmado
     Ktor->>WS: Publica report.created sin datos sensibles
     Ktor-->>Android: 201 + id + trackingCode + estado inicial
     Android-->>Vecino: Muestra, copia y recomienda guardar el código
 ```
 
-Si falla la escritura en la base de datos después de subir un objeto, el backend debe marcar el objeto para limpieza o ejecutar una compensación. Nunca debe responder éxito sin commit confirmado.
+El reporte y su imagen se confirman en la misma transacción. Nunca se responde éxito si el binario, sus metadatos o el reporte no quedaron persistidos de forma coherente.
 
 ### Cambio de estado administrativo
 
@@ -143,7 +141,7 @@ Contenedor backend-ktor
    └── archivos estáticos admin-web
         │
         ├── PostgreSQL administrado + PostGIS
-        ├── S3-compatible
+        │    └── datos e imágenes BYTEA
         └── servicio de logs/métricas
 ```
 
@@ -154,7 +152,8 @@ La terminación TLS puede estar en el proxy o en la plataforma de despliegue. El
 - Una imagen Docker reproducible para Ktor.
 - Un proceso de aplicación por contenedor; el escalado horizontal se habilita cuando haya necesidad.
 - PostgreSQL administrado con backups automáticos y prueba de restauración.
-- Bucket privado S3-compatible; las fotografías se entregan mediante URLs firmadas de corta duración.
+- Las fotografías se almacenan en `report_images.data BYTEA`, se entregan mediante endpoints autorizados y quedan incluidas en backups/restauraciones.
+- Se monitorizan tamaño total, crecimiento, I/O y tiempo de restauración de la base, porque las imágenes aumentan su volumen.
 - WebSocket con heartbeat, límite de conexiones y reconexión exponencial en los clientes.
 - Migraciones versionadas ejecutadas antes de habilitar una nueva versión del backend.
 - Configuración por variables de entorno o secreto administrado; ningún secreto en el repositorio.
@@ -162,7 +161,7 @@ La terminación TLS puede estar en el proxy o en la plataforma de despliegue. El
 ## Límites intencionales
 
 - El backend no contiene lógica de presentación de Compose.
-- Android no accede a PostgreSQL ni S3 directamente.
+- Android no accede a PostgreSQL directamente.
 - El panel no ejecuta consultas SQL ni usa credenciales de infraestructura.
 - Las fotografías no atraviesan WebSocket; el evento solo notifica que el reporte cambió.
 - WebSocket no reemplaza REST: REST es la fuente de lectura inicial y WebSocket comunica cambios.

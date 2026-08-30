@@ -33,7 +33,7 @@ El vecino puede consultar el estado con un código de seguimiento sin crear una 
 | Node.js + Express | Kotlin + Ktor | Un backend único comparte lenguaje, tipos y despliegue con la aplicación Android. |
 | SQLite | PostgreSQL + PostGIS | Se necesita integridad transaccional, concurrencia y consultas geoespaciales. |
 | Una aplicación web responsive | Android nativo + panel web administrativo | Se separa la experiencia ciudadana de la operación municipal. |
-| Fotos en una ruta local | Almacenamiento externo compatible con S3 | Mejora durabilidad, escalabilidad y operación del backend. |
+| Fotos en una ruta local | PostgreSQL `BYTEA` en `report_images` | Mantiene reporte, imagen y metadatos bajo una única transacción y política de backup para el MVP. |
 | iOS como posibilidad futura | Fuera del MVP | No forma parte del alcance actual. |
 | Autenticación avanzada de vecinos | Reporte anónimo con `tracking_code` | Reduce fricción y conserva trazabilidad mínima. |
 
@@ -46,7 +46,7 @@ El vecino puede consultar el estado con un código de seguimiento sin crear una 
 - Código de seguimiento opaco, generado por el servidor y mostrado después de crear el reporte.
 - Categorías administrables con un conjunto inicial predefinido.
 - Ubicación como punto geográfico en WGS84.
-- Fotografía opcional con validación de tipo, tamaño y contenido.
+- Fotografía opcional almacenada en PostgreSQL, con validación de tipo, tamaño, firma y dimensiones.
 - Panel web para iniciar sesión, consultar reportes, filtrar, ver el mapa, cambiar estados y eliminar reportes con confirmación.
 - Delegación manual de reportes a un equipo municipal o a un administrador responsable.
 - Prioridad operativa manual (`low`, `medium`, `high`, `urgent`) y fecha objetivo opcional.
@@ -83,7 +83,7 @@ La asignación manual y la prioridad operativa sí forman parte del MVP. Se excl
 | RF-06 | El administrador debe cambiar el estado entre `pending`, `in_progress` y `resolved`. |
 | RF-07 | El panel debe mostrar una tabla paginada y un mapa con los reportes. |
 | RF-08 | El panel debe mostrar totales y distribuciones por categoría y estado. |
-| RF-09 | El backend debe almacenar fotografías en S3 y sus metadatos en PostgreSQL. |
+| RF-09 | El backend debe almacenar el binario y los metadatos de cada fotografía en PostgreSQL. |
 | RF-10 | El administrador debe poder eliminar un reporte con confirmación y auditoría. |
 | RF-11 | El servidor debe generar un `tracking_code` para cada reporte anónimo. |
 | RF-12 | El vecino debe consultar el estado usando solo el código de seguimiento. |
@@ -108,6 +108,7 @@ La asignación manual y la prioridad operativa sí forman parte del MVP. Se excl
 | RNF-09 | Toda comunicación externa debe usar HTTPS; el WebSocket debe usar WSS en producción. |
 | RNF-10 | La interfaz no debe usar el color como único indicador y debe mantener navegación por teclado en el panel. |
 | RNF-11 | Los cambios concurrentes de estado, asignación o prioridad deben detectar versiones obsoletas y evitar sobrescrituras silenciosas. |
+| RNF-12 | Las consultas de listados y mapa nunca deben cargar la columna binaria de imágenes; el contenido se obtiene mediante un endpoint específico. |
 
 ## Criterios de éxito del MVP
 
@@ -116,7 +117,7 @@ La asignación manual y la prioridad operativa sí forman parte del MVP. Se excl
 - Un administrador puede localizar, filtrar y actualizar un reporte desde `/admin`.
 - Un administrador puede delegar un reporte, cambiar su prioridad y recuperar el historial de esos cambios.
 - El cambio de estado se refleja en Android y en el panel sin recargar.
-- La fotografía no se guarda en PostgreSQL y puede recuperarse desde el almacenamiento S3.
+- La fotografía se guarda en `report_images` y puede recuperarse con autorización, tipo MIME y checksum correctos.
 - El historial y la auditoría permiten explicar quién cambió un estado o eliminó un reporte.
 - El sistema puede restaurarse desde un backup probado.
 
@@ -124,7 +125,7 @@ La asignación manual y la prioridad operativa sí forman parte del MVP. Se excl
 
 1. ¿Qué ciudad y zona geográfica se usarán para las pruebas iniciales?
 2. ¿Qué proveedor administrará PostgreSQL + PostGIS?
-3. ¿Qué proveedor S3-compatible se utilizará?
+3. ¿Qué volumen inicial y crecimiento mensual de imágenes debe soportar PostgreSQL?
 4. ¿Qué SDK de mapas se aprobará para Android? Recomendación a evaluar: MapLibre con un proveedor de tiles compatible.
 5. ¿El municipio requiere una segunda lengua o solo español en el MVP?
 6. ¿Qué política de retención se aplicará a reportes, fotografías y auditoría?

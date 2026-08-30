@@ -2,7 +2,7 @@
 
 Plataforma cívica para registrar, ubicar y dar seguimiento a problemas de infraestructura urbana.
 
-El repositorio reúne la documentación técnica, el diseño del producto y los puntos de partida de cada aplicación. El panel Angular actual es un prototipo funcional de interfaz; todavía no constituye una versión de producción.
+El repositorio reúne la documentación técnica, el diseño del producto y los directorios reservados para cada aplicación. Las implementaciones se incorporarán mediante ramas de tarea y pull requests.
 
 ## Arquitectura objetivo
 
@@ -11,7 +11,7 @@ El repositorio reúne la documentación técnica, el diseño del producto y los 
 - Mapas del panel: Leaflet.
 - Backend compartido: Kotlin + Ktor, con API REST y WebSocket.
 - Persistencia: PostgreSQL + PostGIS.
-- Evidencia fotográfica: almacenamiento externo compatible con S3.
+- Evidencia fotográfica: binarios `BYTEA` y metadatos en PostgreSQL.
 - Operación: Docker, HTTPS, backups y base de datos administrada.
 - Sin Node.js en producción, Express, SQLite, React ni servidor web separado para el panel. Node.js/npm se usan únicamente para desarrollar y compilar Angular.
 
@@ -49,6 +49,7 @@ Mapa Urbano/
 10. [Checklist de inicio](docs/09-checklist-de-inicio.md)
 11. [Equipo y responsabilidades](docs/10-equipo-y-responsabilidades.md)
 12. [Flujo Git y estrategia de ramas](docs/11-flujo-git-y-ramas.md)
+13. [Entidades de base de datos y DDL de ejemplo](docs/12-entidades-bd-ejemplo.md)
 
 La fuente de verdad son los archivos Markdown dentro de `docs/`. Los PDF de trabajo y exportaciones locales no se versionan.
 
@@ -60,6 +61,6 @@ La fuente de verdad son los archivos Markdown dentro de `docs/`. Los PDF de trab
 | Arquitectura objetivo | Documentada |
 | Contrato inicial de datos y API | Documentado, pendiente de aprobación |
 | Mockups de interfaces | Incluidos |
-| Prototipo visual Angular | Disponible, todavía con datos simulados |
-| Código funcional de backend y Android | Pendiente |
+| Diseño de interfaz | Documentado mediante mockups |
+| Código funcional de panel, backend y Android | Pendiente |
 | Despliegue | Pendiente |

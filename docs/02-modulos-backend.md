@@ -6,7 +6,7 @@
 - Cada módulo expone casos de uso, no repositorios directamente.
 - Las operaciones que cambian más de una entidad se ejecutan dentro de una transacción.
 - Los eventos se publican después del commit.
-- Las respuestas públicas nunca incluyen credenciales, hashes, rutas internas de S3 ni datos de auditoría.
+- Las respuestas públicas nunca incluyen credenciales, hashes, binarios embebidos en JSON ni datos de auditoría.
 
 ## Mapa de módulos
 
@@ -16,7 +16,7 @@
 | `reports` | Crear, listar, consultar, priorizar y cambiar estado de reportes | `categories`, `media`, `notifications`, `audit` |
 | `assignments` | Equipos, integrantes, asignación y reasignación de reportes | `auth`, `reports`, `notifications`, `audit` |
 | `categories` | Catálogo activo de tipos de problema | `shared` |
-| `media` | Validar imágenes, escribir en S3 y generar URL firmada | `shared` |
+| `media` | Validar, normalizar, persistir y entregar imágenes desde PostgreSQL | `reports`, `shared` |
 | `statistics` | Totales y agregaciones para el panel | `reports`, `categories` |
 | `notifications` | Canales WebSocket y distribución de eventos sanitizados | `reports`, `statistics`, `shared` |
 | `audit` | Registro de acciones administrativas y eventos de seguridad | `shared` |
@@ -61,7 +61,7 @@
 - Descripción: longitud mínima y máxima a definir antes de la migración.
 - La coordenada debe estar dentro del área operativa configurada.
 - El código de seguimiento es aleatorio, no contiene el ID y se muestra al vecino una sola vez en la respuesta de alta.
-- Un mismo reporte puede tener cero o más attachments; la primera versión admite como máximo una fotografía.
+- Un mismo reporte puede tener cero o más imágenes; la primera versión admite como máximo una fotografía.
 
 ## `assignments`
 
@@ -104,18 +104,21 @@ El color es una ayuda visual. El nombre, el ícono y el estado textual deben com
 1. Recibir el archivo como parte del alta del reporte.
 2. Rechazar temprano si excede 5 MB o la extensión no coincide con el formato permitido.
 3. Validar MIME real y firma binaria; el nombre enviado por el cliente no es confiable.
-4. Generar un `object_key` interno que no use el nombre original.
-5. Subir al bucket privado S3-compatible.
-6. Guardar metadatos en `attachments` dentro de la transacción del reporte.
-7. Entregar una URL firmada solo cuando el consumidor tenga autorización.
+4. Decodificar la imagen, limitar dimensiones y eliminar metadatos EXIF sensibles según la política aprobada.
+5. Calcular checksum SHA-256 y conservar el binario validado como `BYTEA`.
+6. Guardar `reports` y `report_images` dentro de la misma transacción.
+7. Entregar el contenido mediante un endpoint específico que comprueba visibilidad o sesión administrativa.
 
 ### Reglas
 
 - Permitidos: JPG, PNG y WebP.
 - Límite: 5 MB por archivo.
-- No se ejecuta contenido activo desde el bucket.
+- El binario nunca se serializa como Base64 dentro de respuestas JSON.
+- Las consultas de mapa, tabla y estadísticas no seleccionan `report_images.data`.
+- La respuesta de imagen usa `Content-Type`, `Content-Length`, `ETag`, `X-Content-Type-Options: nosniff` y una política de caché definida.
+- No se ejecuta contenido activo ni se aceptan formatos vectoriales o animados en el MVP.
 - Se debe eliminar EXIF sensible si el tratamiento de privacidad lo exige.
-- La URL firmada debe expirar y no debe aparecer en logs.
+- El contenido binario y el código de seguimiento nunca deben aparecer en logs.
 
 ## `statistics`
 
@@ -147,7 +150,7 @@ Registra como mínimo:
 - Alta o desactivación de categorías.
 - Errores de autorización relevantes.
 
-Cada evento incluye actor, acción, entidad, identificador, fecha, IP normalizada y metadatos mínimos. No debe registrar contraseñas, códigos de seguimiento ni URLs firmadas.
+Cada evento incluye actor, acción, entidad, identificador, fecha, IP normalizada y metadatos mínimos. No debe registrar contraseñas, códigos de seguimiento ni contenido binario.
 
 ## Contratos entre módulos
 

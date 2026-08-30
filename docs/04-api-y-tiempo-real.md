@@ -8,7 +8,7 @@
 - UUID en formato textual.
 - Errores con código estable y mensaje accionable.
 - Paginación por cursor para el panel; límite explícito para mapa.
-- La API nunca devuelve contraseñas, hashes, códigos completos ajenos ni rutas internas de S3.
+- La API nunca devuelve contraseñas, hashes, códigos completos ajenos ni imágenes embebidas en JSON.
 
 ## Formato de error
 
@@ -34,6 +34,7 @@ Los mensajes de autenticación y seguimiento no deben confirmar si un usuario, r
 | `GET /api/v1/categories` | Listar categorías activas. | `200` con catálogo. |
 | `GET /api/v1/reports?bbox=...&status=...&category=...` | Obtener marcadores dentro del área visible. | `200` paginado o limitado. |
 | `GET /api/v1/reports/{id}` | Ver detalle público de un reporte. | `200`, `404` genérico si no está disponible. |
+| `GET /api/v1/reports/{id}/image` | Obtener la imagen de un reporte públicamente visible. | `200` binario, `404` genérico si no está disponible. |
 | `POST /api/v1/reports` | Crear reporte anónimo; acepta `multipart/form-data`. | `201` con código completo una sola vez. |
 | `POST /api/v1/report-status` | Consultar estado usando `trackingCode` en el cuerpo. | `200` con estado e historial público. |
 | `GET /health/live` | Verificar proceso. | `200` si el proceso vive. |
@@ -75,7 +76,7 @@ Request conceptual:
 }
 ```
 
-La respuesta incluye solo información pública: estado actual, categoría, ubicación aproximada o exacta según la política, fechas e historial visible. No incluye identidad del administrador, notas internas ni URLs S3 permanentes.
+La respuesta incluye solo información pública: estado actual, categoría, ubicación aproximada o exacta según la política, fechas e historial visible. Puede incluir `hasImage` y la ruta del endpoint binario, pero nunca Base64, identidad del administrador ni notas internas.
 
 ## Endpoints administrativos
 
@@ -85,7 +86,8 @@ La respuesta incluye solo información pública: estado actual, categoría, ubic
 | `POST /api/v1/auth/logout` | Invalidar sesión. | Sesión válida. |
 | `GET /api/v1/auth/me` | Consultar administrador actual. | Sesión válida. |
 | `GET /api/v1/admin/reports` | Tabla paginada con filtros por estado, categoría, prioridad, equipo, responsable y fecha objetivo. | Sesión válida. |
-| `GET /api/v1/admin/reports/{id}` | Detalle completo y attachments firmados. | Sesión válida. |
+| `GET /api/v1/admin/reports/{id}` | Detalle completo y metadatos de imagen. | Sesión válida. |
+| `GET /api/v1/admin/reports/{id}/image` | Obtener la imagen aunque el reporte no sea público. | Sesión válida y permiso. |
 | `PATCH /api/v1/admin/reports/{id}/status` | Cambiar estado y registrar historial. | Sesión válida. |
 | `PATCH /api/v1/admin/reports/{id}/priority` | Cambiar prioridad o fecha objetivo con control de versión. | Sesión válida y permiso. |
 | `PUT /api/v1/admin/reports/{id}/assignment` | Asignar o reasignar a equipo/responsable. | Sesión válida y permiso. |
@@ -122,6 +124,21 @@ Prioridad conceptual:
 ```
 
 Las respuestas devuelven el reporte actualizado, su nueva `version` y el resumen de historial necesario para refrescar la interfaz.
+
+### Entrega de imágenes
+
+Los endpoints de imagen leen `report_images.data` solo después de comprobar que el reporte es visible o que la sesión tiene permiso. La respuesta no es JSON:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: image/jpeg
+Content-Length: 184233
+ETag: "sha256-del-contenido"
+X-Content-Type-Options: nosniff
+Cache-Control: private, max-age=300
+```
+
+El backend admite `If-None-Match` para responder `304` cuando el checksum no cambió. Los endpoints de mapa, tabla, estadísticas e historial nunca cargan la columna `BYTEA`.
 
 ## WebSocket
 

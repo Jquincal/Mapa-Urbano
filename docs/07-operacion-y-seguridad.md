@@ -11,7 +11,7 @@ La plataforma maneja ubicaciones, fotografías y acciones administrativas. La se
 | Alta pública | Spam, abuso y contenido malicioso | Rate limit, validación, límites de payload y moderación operativa. |
 | Código de seguimiento | Acceso no autorizado a un reporte | Código aleatorio, alta entropía, hash/HMAC, mensajes genéricos y rate limit. |
 | Login admin | Fuerza bruta o robo de sesión | Hash adaptativo, rate limit, cookie segura, expiración y logout. |
-| Fotografía | Malware, EXIF o costos inesperados | Bucket privado, validación binaria, 5 MB, checksum, URL firmada y limpieza. |
+| Fotografía | Malware, EXIF o crecimiento inesperado | Validación binaria, 5 MB, dimensiones máximas, checksum, `BYTEA` y endpoint autorizado. |
 | API | Inyección y exposición de datos | Queries parametrizadas, validación de entrada y serializadores explícitos. |
 | WebSocket | Fuga de datos o agotamiento de recursos | Canales separados, autenticación admin, límites, heartbeat y origen validado. |
 | Base de datos | Pérdida o acceso excesivo | Proveedor administrado, mínimo privilegio, backups y TLS. |
@@ -40,22 +40,23 @@ El código funciona como un bearer token: quien lo posee puede consultar el repo
 - Mensajes de login genéricos y eventos de login auditados.
 - No permitir credenciales por defecto en producción.
 
-## Fotografía y almacenamiento S3
+## Fotografía en PostgreSQL
 
-- Bucket privado; no se sirve por URL pública permanente.
-- Claves generadas por el backend, sin nombres ni rutas controladas por el cliente.
-- Validar tamaño antes de procesar y MIME real después de recibir.
+- Guardar el binario validado en `report_images.data BYTEA`, nunca como Base64.
+- Confirmar reporte, imagen y metadatos dentro de una única transacción.
+- Validar tamaño antes de procesar, MIME real, firma binaria y dimensiones después de decodificar.
 - Aceptar solo JPG, PNG y WebP, según límites aprobados.
-- Considerar eliminación de metadatos EXIF si la política de privacidad lo requiere.
-- Usar URLs firmadas de corta duración para administradores autorizados.
-- Registrar checksum y tamaño; no registrar el contenido.
-- Definir ciclo de vida, retención y proceso de borrado.
-- Monitorizar costos y cantidad de objetos.
+- Eliminar metadatos EXIF sensibles cuando la política de privacidad lo requiera.
+- Entregar el archivo mediante un endpoint autorizado con `Content-Type`, `Content-Length`, `ETag` y `nosniff`.
+- Excluir la columna binaria de listados, mapa, estadísticas, auditoría y logs.
+- Registrar checksum, tamaño y dimensiones; nunca registrar el contenido.
+- Definir retención y borrado coordinado con la política del reporte.
+- Monitorizar tamaño de la base, crecimiento, I/O, latencia, backup y restauración.
 
 ## Red y despliegue
 
 - HTTPS obligatorio en producción; WebSocket usa WSS.
-- Red privada para PostgreSQL y S3 cuando el proveedor lo permita.
+- Red privada para PostgreSQL cuando el proveedor lo permita.
 - Lista de orígenes permitidos; evitar `*` en producción.
 - Reverse proxy configurado con headers reenviados confiables.
 - Imagen Docker mínima y actualizada, sin herramientas de desarrollo.
@@ -70,7 +71,7 @@ Objetivos propuestos, pendientes de aprobación:
 | Elemento | Objetivo inicial |
 |---|---|
 | Base de datos | Backup automático diario y recuperación a un punto en el tiempo si el proveedor lo permite. |
-| Fotografías | Versionado o política de recuperación según costo y privacidad. |
+| Fotografías | Incluidas en el backup de PostgreSQL y verificadas durante la restauración. |
 | RPO | Hasta 24 horas para MVP, salvo exigencia municipal diferente. |
 | RTO | Hasta 4 horas para MVP, sujeto al proveedor. |
 | Prueba de restauración | Mensual en un entorno separado y después de cambios de infraestructura. |
@@ -83,7 +84,8 @@ Un backup no se considera válido hasta restaurarlo. El runbook debe incluir cre
 
 - Latencia p50/p95/p99 por ruta.
 - Errores 4xx/5xx por endpoint.
-- Tiempo de alta incluyendo almacenamiento S3.
+- Tiempo de validación e inserción de imágenes en PostgreSQL.
+- Latencia y bytes transferidos por el endpoint de imágenes.
 - Cantidad de reportes por estado.
 - Rechazos de fotografías por motivo.
 - Conexiones activas, reconexiones y errores WebSocket.
@@ -97,7 +99,7 @@ Cada request debe incluir `requestId`, ruta, método, código y duración. No re
 - Contraseñas.
 - Códigos de seguimiento completos.
 - Hashes de contraseñas.
-- URLs firmadas.
+- Contenido binario o representaciones Base64.
 - Cuerpo completo de descripciones o notas internas.
 - Fotografías.
 
@@ -109,7 +111,8 @@ Cada request debe incluir `requestId`, ruta, método, código y duración. No re
 - XSS con títulos, descripciones y nombres de archivo maliciosos.
 - Inyección SQL mediante campos de búsqueda y filtros.
 - Archivos falsos, polyglots, MIME alterado y payloads superiores a 5 MB.
-- Acceso directo a objetos S3 sin firma.
+- Acceso al endpoint de imagen sin visibilidad pública o permiso administrativo.
+- Confirmación de que listados y estadísticas no seleccionan la columna `BYTEA`.
 - WebSocket sin sesión en canal admin.
 - Bypass de filtros geográficos y paginación ilimitada.
 - Verificación de que cada cambio produce historial y auditoría.

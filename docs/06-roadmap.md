@@ -13,7 +13,7 @@ Las horas son estimaciones iniciales. Cada tarea está dimensionada para una ent
 | H0 — Documentación aprobada | Contratos, modelo, UX y operación alineados. | Se cierran las preguntas de `00-estado-y-alcance.md`. |
 | H1 — Fundación ejecutable | Ktor, Docker, configuración y health checks. | Backend arranca localmente y valida dependencias. |
 | H2 — Reportes persistentes | PostgreSQL/PostGIS, categorías y CRUD público. | Se puede crear y consultar un reporte con ubicación. |
-| H3 — Evidencia y seguimiento | S3, attachments y código anónimo. | Un vecino recibe y usa su código. |
+| H3 — Evidencia y seguimiento | Imágenes `BYTEA`, endpoint binario y código anónimo. | Un vecino recibe su código y la evidencia persiste con el reporte. |
 | H4 — Panel administrativo | Login, tabla, mapa, filtros, estado, prioridad y delegación. | Un admin gestiona y asigna un reporte end-to-end. |
 | H5 — Android | Mapa, alta, fotografía y seguimiento. | Flujo principal probado en un dispositivo real. |
 | H6 — Tiempo real | WebSocket para reportes y estadísticas. | Cambios visibles sin recargar ambas interfaces. |
@@ -26,7 +26,7 @@ Estado: en progreso en esta entrega.
 | Tarea | Esfuerzo | Responsable sugerido | Dependencia | Terminado cuando |
 |---|---:|---|---|---|
 | Aprobar alcance y sustituciones tecnológicas | 2 h | Producto/equipo | — | Se aprueba la tabla de trazabilidad. |
-| Cerrar proveedor de PostgreSQL/PostGIS y S3 | 2 h | Operación | — | Existen nombres de entorno y límites. |
+| Cerrar proveedor y capacidad de PostgreSQL/PostGIS | 2 h | Operación/DB | — | Existen entorno, límites, backup y proyección de imágenes. |
 | Elegir SDK de mapas para Android | 2 h | Android/UX | — | La decisión incluye tiles, licencia y offline. |
 | Revisar mockups y flujos con stakeholders | 4 h | UX/producto | — | Se anotan cambios y aceptación. |
 
@@ -56,11 +56,12 @@ Estado: en progreso en esta entrega.
 
 | Tarea | Esfuerzo | Responsable sugerido | Dependencia | Terminado cuando |
 |---|---:|---|---|---|
-| Configurar cliente S3 y bucket privado | 4 h | Backend/DevOps | H1 | El backend sube y lee un objeto de prueba. |
+| Crear migración `report_images` con `BYTEA` | 4 h | Backend/DB | Fase 2 | Binario y metadatos se crean con restricciones verificables. |
 | Validar MIME, firma, tamaño y checksum | 4 h | Backend | H1 | Los archivos inválidos se rechazan antes de persistir. |
-| Integrar attachment con creación de reporte | 6 h | Backend | Fase 2 + S3 | No quedan reportes exitosos sin metadatos coherentes. |
+| Integrar imagen con creación de reporte | 6 h | Backend | Fase 2 + migración | Reporte e imagen se confirman o revierten en la misma transacción. |
+| Implementar endpoint binario y caché | 4 h | Backend | Imagen persistente | Responde MIME, tamaño, ETag, `nosniff` y autorización correctos. |
 | Implementar consulta por `trackingCode` | 4 h | Backend | Fase 2 | Devuelve solo información pública y tiene rate limit. |
-| Probar limpieza de objetos huérfanos | 3 h | Backend/DevOps | S3 | Existe procedimiento para fallos entre S3 y DB. |
+| Medir backup/restore con imágenes | 4 h | DB/DevOps | Datos representativos | Se conocen tamaño, RPO/RTO y tiempo de restauración. |
 
 ## Fase 4 — Panel web administrativo Angular
 
@@ -117,7 +118,7 @@ Decisiones aprobadas
 Ktor + Docker ──→ API y migraciones ──→ Panel web
         │                  │              ↑
         │                  └──→ Android ──┘
-        └──→ S3/media ──→ Seguimiento y evidencia
+        └──→ PostgreSQL/media BYTEA ──→ Seguimiento y evidencia
 
 Reportes + commit confirmado ──→ Eventos ──→ WebSocket
 ```
@@ -129,11 +130,11 @@ Reportes + commit confirmado ──→ Eventos ──→ WebSocket
 | Reglas de delegación o prioridad no están acordadas | Alto | Media | Cerrar equipos, permisos, valores y conflictos antes del sprint administrativo. |
 | Servicio de tiles limita o cambia condiciones | Alto | Media | Elegir proveedor con límites documentados y plan alternativo. |
 | Código de seguimiento perdido | Alto | Media | Mostrarlo una sola vez con copiar/compartir y explicar la consecuencia. |
-| Fallo entre S3 y PostgreSQL | Medio | Media | Compensación, limpieza de huérfanos y prueba de recuperación. |
+| Crecimiento de imágenes degrada la base o backups | Alto | Media | Límite de 5 MB, consultas sin binario, métricas de volumen y pruebas periódicas de restore. |
 | Muchas conexiones WebSocket | Medio | Baja | Límites, heartbeat, escalado horizontal y re-sincronización REST. |
 | Datos sensibles en logs o auditoría | Alto | Baja | Lista explícita de campos prohibidos y revisión automatizada. |
 | Confusión entre repositorio del proyecto y home | Alto | Media | Crear/confirmar una raíz Git dentro de `Mapa Urbano` antes de programar. |
 
 ## Reserva de planificación
 
-Agregar 20–30% de buffer sobre las estimaciones después de validar proveedor de mapas, S3, autenticación y política de datos.
+Agregar 20–30% de buffer sobre las estimaciones después de validar proveedor de mapas, capacidad de PostgreSQL, autenticación y política de datos.

@@ -1,0 +1,11 @@
+# Copia este archivo como .github/CODEOWNERS después de reemplazar todos los
+# marcadores por usuarios reales de GitHub. No actives propietarios inventados.
+
+* @USUARIO_GITHUB_JOAQUIN
+
+/android-app/ @USUARIO_GITHUB_JOAQUIN @USUARIO_GITHUB_MAURO
+/backend-ktor/ @USUARIO_GITHUB_JUAN @USUARIO_GITHUB_JOAQUIN
+/database/ @USUARIO_GITHUB_ALDANA @USUARIO_GITHUB_JUAN
+/admin-web/ @USUARIO_GITHUB_SANTI @USUARIO_GITHUB_QUIMEY
+/docs/ @USUARIO_GITHUB_JOAQUIN
+/.github/ @USUARIO_GITHUB_JOAQUIN @USUARIO_GITHUB_MAURO

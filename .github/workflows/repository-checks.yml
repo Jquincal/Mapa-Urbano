@@ -1,0 +1,31 @@
+name: Repository checks
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Markdown links
+        run: python3 scripts/check_docs.py
+
+      - name: Check whitespace errors
+        run: git diff --check HEAD^
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+
+      - name: Reject versioned PDF files
+        run: |
+          if git ls-files '*.pdf' | grep -q .; then
+            echo 'PDF files must remain outside Git; publish Markdown and images instead.'
+            exit 1
+          fi

@@ -1,0 +1,42 @@
+name: Nueva funcionalidad
+description: Proponer una historia o mejora del producto
+title: "[MU-000] "
+labels:
+  - feature
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objetivo
+      description: ¿Qué resultado debe obtener el usuario o el sistema?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área principal
+      options:
+        - Android
+        - Backend
+        - Base de datos
+        - Web
+        - DevOps
+        - Documentación
+        - Integración
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Criterios de aceptación
+      placeholder: |
+        - Dado...
+        - Cuando...
+        - Entonces...
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencias y riesgos
+      description: Contratos, migraciones, permisos u otras tareas necesarias.

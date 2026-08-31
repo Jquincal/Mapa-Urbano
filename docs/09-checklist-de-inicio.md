@@ -12,6 +12,7 @@
 - [ ] Confirmar equipos iniciales, responsables, permisos y reglas de reasignación.
 - [ ] Confirmar valores de prioridad y criterio municipal para `urgent` y fecha objetivo.
 - [ ] Definir límites de descripción, retención y política de baja.
+- [ ] Definir requisitos de contraseña, verificación de correo y política de baja/anonimización de vecinos.
 - [ ] Validar mockups con stakeholders y registrar cambios.
 
 ## Orden recomendado de trabajo
@@ -20,22 +21,25 @@
 2. Crear el repositorio dentro de la carpeta del proyecto.
 3. Configurar Ktor, Docker, health checks y configuración segura.
 4. Crear migraciones PostgreSQL/PostGIS y seeds.
-5. Implementar el flujo de alta y consulta pública.
-6. Integrar `report_images` y el endpoint binario.
-7. Implementar autenticación y API administrativa.
-8. Implementar asignación, prioridad e historial administrativo.
-9. Construir el panel Angular y servir sus assets compilados desde Ktor.
-10. Construir Android con el mismo contrato REST.
-11. Agregar WebSocket, reconexión y sincronización.
-12. Ejecutar pruebas de seguridad, rendimiento y accesibilidad.
-13. Preparar staging, backups, restauración y manual operativo.
+5. Implementar registro, sesión revocable de vecinos y `Mis reportes`.
+6. Implementar los modos de alta `account` y `anonymous`.
+7. Integrar `report_images` y el endpoint binario.
+8. Implementar autenticación y API administrativa.
+9. Implementar asignación, prioridad e historial administrativo.
+10. Construir el panel Angular y servir sus assets compilados desde Ktor.
+11. Construir Android con el mismo contrato REST.
+12. Agregar WebSocket, reconexión y sincronización.
+13. Ejecutar pruebas de seguridad, rendimiento y accesibilidad.
+14. Preparar staging, backups, restauración y manual operativo.
 
 ## Definition of Done de la primera entrega técnica
 
 - [ ] El backend arranca dentro de Docker.
 - [ ] El panel Angular se sirve desde Ktor sin Node como runtime ni servidor web adicional.
 - [ ] PostgreSQL tiene PostGIS, tablas obligatorias, índices y categorías iniciales.
-- [ ] Un reporte puede crearse con ubicación y estado `pending`.
+- [ ] Un vecino puede registrarse, iniciar/cerrar sesión y consultar solo sus reportes.
+- [ ] Un reporte en modo cuenta deriva `user_id` de la sesión y no genera código.
+- [ ] Un reporte anónimo guarda `user_id = NULL` y genera código de seguimiento.
 - [ ] El código de seguimiento no expone el ID ni datos personales.
 - [ ] Una fotografía válida termina en `report_images.data` con MIME, tamaño, checksum y dimensiones coherentes.
 - [ ] El administrador puede iniciar sesión y cambiar el estado.

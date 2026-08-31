@@ -4,7 +4,7 @@
 
 Este documento adapta el documento original **Mapa Colaborativo de Problemas Urbanos v2.0** a la arquitectura solicitada para Mapa Urbano.
 
-Fecha de revisión: 30 de agosto de 2026.
+Fecha de revisión: 31 de agosto de 2026.
 
 La carpeta de trabajo se llama `Mapa Urbano`, aunque la ruta solicitada decía `Mapa Urban`. Se trabajó sobre la carpeta existente.
 
@@ -12,7 +12,7 @@ La carpeta de trabajo se llama `Mapa Urbano`, aunque la ruta solicitada decía `
 
 Permitir que un vecino registre un problema urbano desde Android, con ubicación y evidencia opcional, y que el municipio lo gestione desde un panel web administrativo.
 
-El vecino puede consultar el estado con un código de seguimiento sin crear una cuenta. El municipio obtiene una vista geográfica, operativa y auditable de los reportes.
+El vecino puede crear una cuenta para conservar sus reportes y consultar su evolución, o realizar un reporte anónimo y seguirlo mediante un código opaco. El municipio obtiene una vista geográfica, operativa y auditable sin exponer datos personales en las vistas públicas.
 
 ## Qué se conserva del documento original
 
@@ -35,15 +35,17 @@ El vecino puede consultar el estado con un código de seguimiento sin crear una 
 | Una aplicación web responsive | Android nativo + panel web administrativo | Se separa la experiencia ciudadana de la operación municipal. |
 | Fotos en una ruta local | PostgreSQL `BYTEA` en `report_images` | Mantiene reporte, imagen y metadatos bajo una única transacción y política de backup para el MVP. |
 | iOS como posibilidad futura | Fuera del MVP | No forma parte del alcance actual. |
-| Autenticación avanzada de vecinos | Reporte anónimo con `tracking_code` | Reduce fricción y conserva trazabilidad mínima. |
+| Cuenta obligatoria de vecino | Cuenta opcional o reporte anónimo con `tracking_code` | Permite conservar reportes en una cuenta sin impedir el acceso anónimo. |
 
 ## Alcance del MVP
 
 ### Incluido
 
-- Aplicación Android para ver el mapa, crear reportes y consultar su seguimiento.
-- Reportes anónimos sin cuenta de vecino.
-- Código de seguimiento opaco, generado por el servidor y mostrado después de crear el reporte.
+- Aplicación Android para ver el mapa, registrarse, iniciar sesión, crear reportes y consultar su seguimiento.
+- Cuenta opcional de vecino con correo, nombre visible y contraseña protegida mediante hash adaptativo.
+- Listado privado de los reportes creados con la cuenta autenticada.
+- Reportes anónimos disponibles sin registro, incluso como elección explícita de un vecino autenticado.
+- Código de seguimiento opaco generado únicamente para reportes anónimos y mostrado después de crearlos.
 - Categorías administrables con un conjunto inicial predefinido.
 - Ubicación como punto geográfico en WGS84.
 - Fotografía opcional almacenada en PostgreSQL, con validación de tipo, tamaño, firma y dimensiones.
@@ -58,7 +60,8 @@ El vecino puede consultar el estado con un código de seguimiento sin crear una 
 ### Fuera del MVP
 
 - Aplicación iOS.
-- Cuenta o perfil de vecino.
+- Recuperación de contraseña, login social y edición avanzada del perfil del vecino.
+- Vinculación posterior de un reporte anónimo con una cuenta.
 - Notificaciones push móviles.
 - Chat entre vecino y municipio.
 - Planificación avanzada de recorridos, turnos y capacidad de cuadrillas.
@@ -92,6 +95,10 @@ La asignación manual y la prioridad operativa sí forman parte del MVP. Se excl
 | RF-15 | El administrador debe poder asignar o reasignar un reporte a un equipo o responsable. |
 | RF-16 | El administrador debe poder establecer la prioridad y una fecha objetivo opcional. |
 | RF-17 | Cada cambio de asignación o prioridad debe conservar actor, fecha y valor anterior. |
+| RF-18 | El vecino debe poder registrarse, iniciar sesión, consultar su sesión y cerrarla. |
+| RF-19 | El vecino autenticado debe poder listar y consultar los reportes creados con su cuenta. |
+| RF-20 | El alta debe permitir elegir explícitamente entre reporte asociado a la cuenta y reporte anónimo. |
+| RF-21 | El backend debe obtener el autor registrado desde la sesión y nunca aceptar un `userId` enviado por el cliente. |
 
 ### No funcionales
 
@@ -109,11 +116,15 @@ La asignación manual y la prioridad operativa sí forman parte del MVP. Se excl
 | RNF-10 | La interfaz no debe usar el color como único indicador y debe mantener navegación por teclado en el panel. |
 | RNF-11 | Los cambios concurrentes de estado, asignación o prioridad deben detectar versiones obsoletas y evitar sobrescrituras silenciosas. |
 | RNF-12 | Las consultas de listados y mapa nunca deben cargar la columna binaria de imágenes; el contenido se obtiene mediante un endpoint específico. |
+| RNF-13 | Contraseñas y tokens de sesión nunca se almacenan en texto plano ni aparecen en respuestas, logs o auditoría. |
+| RNF-14 | Las respuestas públicas y eventos WebSocket nunca exponen correo, identificador de cuenta ni otro dato personal del autor. |
 
 ## Criterios de éxito del MVP
 
-- Un vecino puede crear un reporte anónimo desde Android en menos de tres minutos.
-- El vecino recibe un código de seguimiento copiable y puede consultar el estado sin registrarse.
+- Un vecino puede registrarse, iniciar sesión y crear un reporte asociado a su cuenta desde Android.
+- El vecino autenticado puede consultar sus reportes sin introducir códigos de seguimiento.
+- Un vecino puede elegir crear un reporte anónimo en menos de tres minutos.
+- Para un reporte anónimo, el vecino recibe un código copiable y puede consultar el estado sin registrarse.
 - Un administrador puede localizar, filtrar y actualizar un reporte desde `/admin`.
 - Un administrador puede delegar un reporte, cambiar su prioridad y recuperar el historial de esos cambios.
 - El cambio de estado se refleja en Android y en el panel sin recargar.
@@ -131,3 +142,5 @@ La asignación manual y la prioridad operativa sí forman parte del MVP. Se excl
 6. ¿Qué política de retención se aplicará a reportes, fotografías y auditoría?
 7. ¿Qué equipos municipales y administradores se cargarán inicialmente?
 8. ¿Qué reglas municipales determinarán el uso de `urgent` y las fechas objetivo?
+9. ¿Se exigirá verificar el correo antes de crear reportes registrados?
+10. ¿Qué política de baja, anonimización y retención se aplicará a las cuentas de vecinos?

@@ -11,6 +11,7 @@ El repositorio reúne la documentación técnica, el diseño del producto y los 
 - Mapas del panel: Leaflet.
 - Backend compartido: Kotlin + Ktor, con API REST y WebSocket.
 - Persistencia: PostgreSQL + PostGIS.
+- Acceso ciudadano: cuenta opcional con `Mis reportes` o envío anónimo mediante código de seguimiento.
 - Evidencia fotográfica: binarios `BYTEA` y metadatos en PostgreSQL.
 - Operación: Docker, HTTPS, backups y base de datos administrada.
 - Sin Node.js en producción, Express, SQLite, React ni servidor web separado para el panel. Node.js/npm se usan únicamente para desarrollar y compilar Angular.
@@ -62,5 +63,6 @@ La fuente de verdad son los archivos Markdown dentro de `docs/`. Los PDF de trab
 | Contrato inicial de datos y API | Documentado, pendiente de aprobación |
 | Mockups de interfaces | Incluidos |
 | Diseño de interfaz | Documentado mediante mockups |
-| Código funcional de panel, backend y Android | Pendiente |
+| Fundación ejecutable del backend y rutas base | Completa |
+| Lógica funcional de panel, backend y Android | Pendiente |
 | Despliegue | Pendiente |

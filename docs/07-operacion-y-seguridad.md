@@ -2,13 +2,15 @@
 
 ## Objetivo
 
-La plataforma maneja ubicaciones, fotografías y acciones administrativas. La seguridad debe estar presente desde el primer endpoint, aunque el MVP no tenga cuentas de vecinos.
+La plataforma maneja cuentas de vecinos, ubicaciones, fotografías y acciones administrativas. La seguridad debe estar presente desde el registro y el primer reporte.
 
 ## Controles por superficie
 
 | Superficie | Riesgo principal | Control mínimo |
 |---|---|---|
 | Alta pública | Spam, abuso y contenido malicioso | Rate limit, validación, límites de payload y moderación operativa. |
+| Registro/login de vecino | Enumeración, fuerza bruta o credenciales robadas | Mensajes genéricos, hash adaptativo, rate limit y sesiones revocables. |
+| Sesión Android | Robo o reproducción del token | Token opaco con hash en servidor, expiración, revocación y almacenamiento seguro del dispositivo. |
 | Código de seguimiento | Acceso no autorizado a un reporte | Código aleatorio, alta entropía, hash/HMAC, mensajes genéricos y rate limit. |
 | Login admin | Fuerza bruta o robo de sesión | Hash adaptativo, rate limit, cookie segura, expiración y logout. |
 | Fotografía | Malware, EXIF o crecimiento inesperado | Validación binaria, 5 MB, dimensiones máximas, checksum, `BYTEA` y endpoint autorizado. |
@@ -29,6 +31,18 @@ La plataforma maneja ubicaciones, fotografías y acciones administrativas. La se
 - Definir antes del lanzamiento una política de expiración o permanencia.
 
 El código funciona como un bearer token: quien lo posee puede consultar el reporte. La interfaz debe explicarlo sin lenguaje técnico.
+
+## Cuentas y sesiones de vecinos
+
+- Normalizar el correo y aplicar unicidad sin distinguir mayúsculas.
+- Guardar contraseñas con un hash adaptativo aprobado y parámetros actualizables.
+- Entregar a Android un token opaco aleatorio; guardar únicamente `token_hash` en `user_sessions`.
+- Conservar el token en almacenamiento seguro del dispositivo y enviarlo solo por HTTPS como Bearer.
+- Aplicar expiración absoluta, expiración por inactividad y revocación en logout o baja.
+- Derivar `reports.user_id` de la sesión; rechazar cualquier `userId` recibido en el alta.
+- En modo anónimo, no guardar `user_id` ni otra referencia de cuenta aunque exista sesión.
+- No exponer correo, nombre o identificador del autor en REST público, WebSocket, logs o analítica.
+- Mantener separadas las sesiones de vecinos y administradores; ninguna credencial de vecino habilita `/api/v1/admin/*`.
 
 ## Sesiones administrativas
 
@@ -97,6 +111,8 @@ Un backup no se considera válido hasta restaurarlo. El runbook debe incluir cre
 Cada request debe incluir `requestId`, ruta, método, código y duración. No registrar:
 
 - Contraseñas.
+- Correos completos salvo en un contexto operativo explícitamente autorizado.
+- Tokens de sesión de vecinos o administradores.
 - Códigos de seguimiento completos.
 - Hashes de contraseñas.
 - Contenido binario o representaciones Base64.
@@ -106,6 +122,9 @@ Cada request debe incluir `requestId`, ruta, método, código y duración. No re
 ## Pruebas de seguridad antes de producción
 
 - Validación de autenticación, autorización y expiración de sesión.
+- Registro duplicado, enumeración de correo, revocación y acceso cruzado entre cuentas.
+- Intento de enviar un `userId` ajeno y verificación de que el backend lo ignora o rechaza.
+- Reporte anónimo creado con sesión activa y confirmación de que no queda asociado a la cuenta.
 - Intentos repetidos de login y consulta por código.
 - CSRF en todas las mutaciones con cookie.
 - XSS con títulos, descripciones y nombres de archivo maliciosos.

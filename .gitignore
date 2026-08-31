@@ -36,6 +36,8 @@ secrets/
 # Kotlin / Gradle / Android
 .gradle/
 **/.gradle/
+.kotlin/
+**/.kotlin/
 **/build/
 **/out/
 *.class

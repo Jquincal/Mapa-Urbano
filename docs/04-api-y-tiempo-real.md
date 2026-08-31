@@ -37,10 +37,11 @@ Las cuentas de vecinos son independientes de las cuentas municipales. Android en
 | `POST /api/v1/users/login` | Iniciar una sesión de vecino. | Pública con rate limit. |
 | `POST /api/v1/users/logout` | Revocar la sesión actual. | Bearer de vecino. |
 | `GET /api/v1/users/me` | Consultar el perfil mínimo propio. | Bearer de vecino. |
+| `DELETE /api/v1/users/me` | Desactivar la cuenta y revocar todas sus sesiones. | Bearer de vecino y confirmación explícita. |
 | `GET /api/v1/users/me/reports` | Listar reportes creados en modo cuenta. | Bearer de vecino. |
 | `GET /api/v1/users/me/reports/{id}` | Consultar un reporte propio y su historial público. | Bearer de vecino y pertenencia. |
 
-El registro recibe `email`, `displayName` y `password`. Registro y login pueden devolver el token completo una sola vez; nunca devuelven hashes. Los errores de correo duplicado y credenciales inválidas deben evitar enumeración innecesaria, y los límites de contraseña se fijarán en el contrato de validación antes de implementar.
+El registro recibe `email`, `displayName` y `password`. Registro y login pueden devolver el token completo una sola vez; nunca devuelven hashes. Los errores de correo duplicado y credenciales inválidas deben evitar enumeración innecesaria, y los límites de contraseña se fijarán en el contrato de validación antes de implementar. La baja de cuenta es lógica: responde `204`, marca la cuenta inactiva, revoca todas sus sesiones y conserva los reportes según la política de retención.
 
 ## Endpoints públicos
 
@@ -116,9 +117,9 @@ La respuesta incluye solo información pública: estado actual, categoría, ubic
 
 | Método y ruta | Propósito | Autorización |
 |---|---|---|
-| `POST /api/v1/auth/login` | Crear sesión del administrador. | Pública con rate limit; no se usa para vecinos. |
-| `POST /api/v1/auth/logout` | Invalidar sesión administrativa. | Sesión administrativa válida. |
-| `GET /api/v1/auth/me` | Consultar administrador actual. | Sesión administrativa válida. |
+| `POST /api/v1/admin/auth/login` | Crear sesión del administrador. | Pública con rate limit; no se usa para vecinos. |
+| `POST /api/v1/admin/auth/logout` | Invalidar sesión administrativa. | Sesión administrativa válida. |
+| `GET /api/v1/admin/auth/me` | Consultar administrador actual. | Sesión administrativa válida. |
 | `GET /api/v1/admin/reports` | Tabla paginada con filtros por estado, categoría, prioridad, equipo, responsable y fecha objetivo. | Sesión válida. |
 | `GET /api/v1/admin/reports/{id}` | Detalle completo y metadatos de imagen. | Sesión válida. |
 | `GET /api/v1/admin/reports/{id}/image` | Obtener la imagen aunque el reporte no sea público. | Sesión válida y permiso. |

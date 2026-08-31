@@ -43,9 +43,12 @@ class RoutingTest {
             Endpoint(HttpMethod.Post, "/api/v1/users/login"),
             Endpoint(HttpMethod.Post, "/api/v1/users/logout"),
             Endpoint(HttpMethod.Get, "/api/v1/users/me"),
+            Endpoint(HttpMethod.Delete, "/api/v1/users/me"),
             Endpoint(HttpMethod.Get, "/api/v1/users/me/reports"),
             Endpoint(HttpMethod.Get, "/api/v1/users/me/reports/123"),
-            Endpoint(HttpMethod.Post, "/api/v1/auth/login"),
+            Endpoint(HttpMethod.Post, "/api/v1/admin/auth/login"),
+            Endpoint(HttpMethod.Post, "/api/v1/admin/auth/logout"),
+            Endpoint(HttpMethod.Get, "/api/v1/admin/auth/me"),
             Endpoint(HttpMethod.Get, "/api/v1/admin/reports"),
             Endpoint(HttpMethod.Patch, "/api/v1/admin/reports/123/status"),
             Endpoint(HttpMethod.Put, "/api/v1/admin/reports/123/assignment"),
@@ -68,6 +71,17 @@ class RoutingTest {
             )
             assertContains(response.bodyAsText(), "NOT_IMPLEMENTED")
         }
+    }
+
+    @Test
+    fun `legacy ambiguous admin login route is not registered`() = testApplication {
+        application { module() }
+
+        val response = client.request("/api/v1/auth/login") {
+            method = HttpMethod.Post
+        }
+
+        assertEquals(HttpStatusCode.NotFound, response.status)
     }
 
     private data class Endpoint(

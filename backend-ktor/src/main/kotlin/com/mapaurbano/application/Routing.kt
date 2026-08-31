@@ -3,7 +3,7 @@ package com.mapaurbano.application
 import com.mapaurbano.assignments.api.assignmentRoutes
 import com.mapaurbano.assignments.api.teamRoutes
 import com.mapaurbano.audit.api.auditRoutes
-import com.mapaurbano.auth.api.authRoutes
+import com.mapaurbano.auth.api.adminAuthRoutes
 import com.mapaurbano.categories.api.adminCategoryRoutes
 import com.mapaurbano.categories.api.publicCategoryRoutes
 import com.mapaurbano.health.api.healthRoutes
@@ -27,10 +27,10 @@ fun Application.configureRouting() {
             publicReportRoutes()
             publicImageRoutes()
             userRoutes()
-            authRoutes()
             webSocketRoutes()
 
             route("/admin") {
+                adminAuthRoutes()
                 adminReportRoutes()
                 adminImageRoutes()
                 assignmentRoutes()

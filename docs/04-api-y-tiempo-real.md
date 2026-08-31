@@ -94,7 +94,14 @@ La respuesta incluye solo información pública: estado actual, categoría, ubic
 | `DELETE /api/v1/admin/reports/{id}/assignment` | Retirar la asignación activa. | Sesión válida y permiso. |
 | `GET /api/v1/admin/teams` | Listar equipos e integrantes activos. | Sesión válida. |
 | `POST /api/v1/admin/teams` | Crear un equipo municipal. | Sesión válida y permiso. |
+| `GET /api/v1/admin/teams/{id}` | Consultar un equipo y sus integrantes. | Sesión válida. |
 | `PATCH /api/v1/admin/teams/{id}` | Editar o desactivar un equipo. | Sesión válida y permiso. |
+| `PUT /api/v1/admin/teams/{teamId}/members/{adminUserId}` | Incorporar un administrador a un equipo. | Sesión válida y permiso. |
+| `DELETE /api/v1/admin/teams/{teamId}/members/{adminUserId}` | Retirar un administrador de un equipo. | Sesión válida y permiso. |
+| `GET /api/v1/admin/assignees?teamId=...` | Listar responsables posibles, opcionalmente por equipo. | Sesión válida. |
+| `GET /api/v1/admin/categories` | Listar todas las categorías para administrarlas. | Sesión válida. |
+| `POST /api/v1/admin/categories` | Crear una categoría. | Sesión válida y permiso. |
+| `PATCH /api/v1/admin/categories/{id}` | Editar o desactivar una categoría. | Sesión válida y permiso. |
 | `DELETE /api/v1/admin/reports/{id}` | Dar de baja un reporte con auditoría. | Sesión válida y permiso. |
 | `GET /api/v1/admin/statistics` | Totales y agregaciones. | Sesión válida. |
 | `GET /api/v1/admin/audit` | Consultar auditoría filtrada. | Sesión válida y permiso. |

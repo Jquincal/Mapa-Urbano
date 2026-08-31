@@ -38,6 +38,7 @@ Cada módulo mantiene su entrada HTTP dentro de un paquete `api`. Al implementar
 src/main/kotlin/com/mapaurbano/
 ├── application/       # Arranque, plugins y registro central de rutas
 ├── auth/api/           # Sesiones administrativas
+├── users/api/          # Registro, sesión y reportes propios del vecino
 ├── reports/api/        # Reportes públicos y administrativos
 ├── categories/api/     # Categorías públicas y administrativas
 ├── media/api/          # Entrega y futura carga de imágenes

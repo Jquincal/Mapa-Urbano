@@ -10,12 +10,16 @@ El modelo detallado y un DDL inicial de referencia están en [12-entidades-bd-ej
 - Las fechas se guardan como `timestamptz` en UTC.
 - Las fotografías se guardan en PostgreSQL como `BYTEA`; la misma fila conserva metadatos, checksum y dimensiones.
 - Las claves públicas preferidas son UUID para evitar enumeración trivial de reportes.
+- Las cuentas de vecinos (`users`) y las cuentas municipales (`admin_users`) son entidades distintas, con sesiones y permisos separados.
 
 ## Modelo lógico
 
 ```mermaid
 erDiagram
     CATEGORIES ||--o{ REPORTS : classifies
+    USERS o|--o{ REPORTS : creates
+    USERS ||--o{ USER_SESSIONS : owns
+    USERS ||--o{ AUDIT_EVENTS : performs
     REPORTS ||--o| REPORT_IMAGES : contains
     REPORTS ||--o{ REPORT_STATUS_HISTORY : records
     REPORTS ||--o{ REPORT_ASSIGNMENTS : receives
@@ -39,6 +43,7 @@ erDiagram
     REPORTS {
         uuid id PK
         uuid category_id FK
+        uuid user_id FK
         varchar status
         varchar priority
         varchar title
@@ -46,11 +51,32 @@ erDiagram
         geography location
         timestamptz due_at
         bigint version
-        varchar tracking_code_hash UK
+        bytea tracking_code_hash UK
         varchar tracking_code_hint
         timestamptz created_at
         timestamptz updated_at
         timestamptz deleted_at
+    }
+    USERS {
+        uuid id PK
+        varchar email UK
+        varchar display_name
+        text password_hash
+        boolean is_active
+        timestamptz email_verified_at
+        timestamptz last_login_at
+        timestamptz created_at
+        timestamptz updated_at
+        timestamptz deleted_at
+    }
+    USER_SESSIONS {
+        uuid id PK
+        uuid user_id FK
+        bytea token_hash UK
+        timestamptz expires_at
+        timestamptz last_used_at
+        timestamptz revoked_at
+        timestamptz created_at
     }
     REPORT_IMAGES {
         uuid id PK
@@ -114,12 +140,13 @@ erDiagram
     AUDIT_EVENTS {
         uuid id PK
         uuid actor_admin_user_id FK
+        uuid actor_user_id FK
         varchar action
         varchar entity_type
         uuid entity_id
         jsonb metadata
         inet source_ip
-        timestamptz created_at
+        timestamptz occurred_at
     }
 ```
 
@@ -131,6 +158,7 @@ erDiagram
 |---|---|---|
 | `id` | UUID | PK, generado por el servidor. |
 | `category_id` | UUID | FK a `categories`, obligatorio y activo al crear. |
+| `user_id` | UUID | FK nullable a `users`; presente solo cuando el reporte se crea en modo cuenta. |
 | `status` | VARCHAR | `pending`, `in_progress` o `resolved`; valor inicial `pending`. |
 | `priority` | VARCHAR | `low`, `medium`, `high` o `urgent`; valor inicial `medium`. |
 | `title` | VARCHAR(150) | Obligatorio, validado por backend. |
@@ -138,13 +166,44 @@ erDiagram
 | `location` | geography(Point, 4326) | Obligatoria; latitud entre -90 y 90, longitud entre -180 y 180. |
 | `due_at` | TIMESTAMPTZ | Opcional; fecha objetivo administrativa en UTC. |
 | `version` | BIGINT | Comienza en 0 y permite detectar actualizaciones concurrentes. |
-| `tracking_code_hash` | CHAR/VARCHAR | Único; HMAC o hash determinista del código opaco. |
-| `tracking_code_hint` | VARCHAR(8) | Fragmento no suficiente para consultar; ayuda a soporte. |
+| `tracking_code_hash` | BYTEA | Nullable y único; presente solo en reportes anónimos. Contiene HMAC o hash determinista del código opaco. |
+| `tracking_code_hint` | VARCHAR(8) | Nullable; fragmento no suficiente para consultar y exclusivo del modo anónimo. |
 | `created_at` | TIMESTAMPTZ | UTC, generado por servidor. |
 | `updated_at` | TIMESTAMPTZ | UTC, cambia al editar o cambiar estado. |
 | `deleted_at` | TIMESTAMPTZ | Nulo mientras el reporte está visible; habilita baja auditable. |
 
-El código completo no se vuelve a almacenar en texto plano. El backend lo genera con un alfabeto sin caracteres ambiguos, devuelve el valor completo solo al crear el reporte y compara consultas mediante una representación no reversible apropiada.
+Una restricción `CHECK` exige exactamente uno de los dos modos de autoría:
+
+- **Registrado:** `user_id IS NOT NULL` y los campos de seguimiento son nulos.
+- **Anónimo:** `user_id IS NULL` y existen `tracking_code_hash` y `tracking_code_hint`.
+
+El código completo no se vuelve a almacenar en texto plano. El backend lo genera con un alfabeto sin caracteres ambiguos, devuelve el valor completo solo al crear el reporte anónimo y compara consultas mediante una representación no reversible apropiada. El `user_id` de un reporte registrado se obtiene de la sesión, nunca del body.
+
+### `users`
+
+| Campo | Tipo | Reglas |
+|---|---|---|
+| `id` | UUID | PK. |
+| `email` | VARCHAR(254) | Obligatorio y único sin distinguir mayúsculas; se normaliza antes de guardar. |
+| `display_name` | VARCHAR(100) | Nombre visible dentro de la cuenta; no se publica junto al reporte. |
+| `password_hash` | TEXT | Hash adaptativo; nunca contraseña plana. |
+| `is_active` | BOOLEAN | Impide nuevos accesos sin eliminar relaciones históricas. |
+| `email_verified_at` | TIMESTAMPTZ | Nullable hasta implementar o completar verificación. |
+| `last_login_at` | TIMESTAMPTZ | Nullable hasta el primer login. |
+| `created_at` / `updated_at` | TIMESTAMPTZ | UTC. |
+| `deleted_at` | TIMESTAMPTZ | Baja lógica; su política de anonimización debe aprobarse antes de producción. |
+
+### `user_sessions`
+
+| Campo | Tipo | Reglas |
+|---|---|---|
+| `id` | UUID | PK interna. |
+| `user_id` | UUID | FK a `users`; obligatorio. |
+| `token_hash` | BYTEA | Único; solo se guarda el hash del token opaco entregado a Android. |
+| `expires_at` | TIMESTAMPTZ | Expiración absoluta obligatoria. |
+| `last_used_at` | TIMESTAMPTZ | Permite expiración por inactividad y diagnóstico sin guardar el token. |
+| `revoked_at` | TIMESTAMPTZ | Nullable; presente después de logout, baja o revocación. |
+| `created_at` | TIMESTAMPTZ | UTC. |
 
 ### `admin_users`
 
@@ -249,11 +308,11 @@ Para el MVP se crea una restricción única sobre `report_id`, porque cada repor
 La arquitectura también requiere estas tablas o equivalentes:
 
 - `audit_events`: historial de acciones de seguridad y administración.
-- `sessions`: sesiones revocables del panel, si se elige persistirlas en PostgreSQL.
+- `admin_sessions`: sesiones revocables del panel, si se elige persistirlas en PostgreSQL.
 - `outbox_events`: opcional, para publicar eventos confiablemente después del commit.
 - `notification_events`: opcional en el MVP; útil cuando se agreguen push o email.
 
-Las tablas `reports`, `report_images`, `admin_users`, `report_status_history`, `categories`, `teams`, `team_members`, `report_assignments` y `report_priority_history` son obligatorias desde la primera migración funcional.
+Las tablas `users`, `user_sessions`, `reports`, `report_images`, `admin_users`, `report_status_history`, `categories`, `teams`, `team_members`, `report_assignments` y `report_priority_history` son obligatorias desde la primera migración funcional.
 
 ## Restricciones e índices
 
@@ -265,7 +324,11 @@ Antes de implementar migraciones se deben fijar las restricciones equivalentes a
 | Índice sobre `reports.status, reports.created_at` | Filtros y orden del panel. |
 | Índice sobre `reports.priority, reports.due_at` | Cola operativa por urgencia y vencimiento. |
 | Índice sobre `reports.category_id, reports.created_at` | Filtro por categoría. |
+| Índice sobre `reports.user_id, reports.created_at` con `user_id IS NOT NULL` | Listado privado de reportes propios. |
 | Índice único sobre `reports.tracking_code_hash` | Búsqueda de seguimiento sin duplicados. |
+| Índice único sobre `lower(users.email)` | Registro y login sin duplicados por mayúsculas. |
+| Índice único sobre `user_sessions.token_hash` | Validación de sesión opaca. |
+| Índice sobre `user_sessions.user_id, expires_at` | Revocación y limpieza de sesiones por cuenta. |
 | Índice único sobre `report_images.report_id` | Una imagen como máximo por reporte en el MVP. |
 | Índice sobre `report_images.checksum_sha256` | Verificación y diagnóstico de integridad sin consultar el binario. |
 | Índice sobre `report_status_history.report_id, changed_at` | Línea de tiempo del reporte. |
@@ -273,7 +336,7 @@ Antes de implementar migraciones se deben fijar las restricciones equivalentes a
 | Índice sobre `report_assignments.team_id, responsible_admin_user_id` | Filtros por equipo y responsable. |
 | Índice sobre `report_priority_history.report_id, changed_at` | Historial de prioridad y fecha objetivo. |
 | Índice único sobre `categories.slug` | Contrato estable para clientes. |
-| Índice sobre `audit_events.entity_type, entity_id, created_at` | Auditoría por entidad. |
+| Índice sobre `audit_events.entity_type, entity_id, occurred_at` | Auditoría por entidad. |
 
 El endpoint de mapa debe exigir `bbox`, radio o límite máximo. No se permitirá descargar la tabla completa sin paginación.
 
@@ -289,7 +352,7 @@ Las coordenadas de respuesta se serializan como `latitude` y `longitude`. La bas
 
 1. Activar la extensión PostGIS.
 2. Crear enums o restricciones de estado.
-3. Crear tablas en orden de dependencias.
+3. Crear `users`, `admin_users` y sus sesiones antes de las tablas que los referencian.
 4. Crear índices y restricciones.
 5. Insertar categorías iniciales de manera idempotente.
 6. Crear el primer administrador por un procedimiento seguro fuera de los commits de código.

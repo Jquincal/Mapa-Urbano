@@ -10,11 +10,11 @@ import io.ktor.server.routing.route
 fun Route.authRoutes() {
     route("/auth") {
         post("/login") {
-            call.respondEndpointNotImplemented("login")
+            call.respondEndpointNotImplemented("loginAdmin")
         }
 
         post("/logout") {
-            call.respondEndpointNotImplemented("logout")
+            call.respondEndpointNotImplemented("logoutAdmin")
         }
 
         get("/me") {

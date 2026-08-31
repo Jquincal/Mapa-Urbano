@@ -10,7 +10,7 @@ Android y el panel administrativo consumen el mismo backend. PostgreSQL + PostGI
 
 ```mermaid
 flowchart LR
-    V[Vecino] --> A[Android<br/>Kotlin + Compose]
+    V[Vecino registrado o anónimo] --> A[Android<br/>Kotlin + Compose]
     M[Administrador municipal] --> W[Panel web<br/>Angular + TypeScript + Leaflet]
     A -->|HTTPS REST / WSS| K[Backend central<br/>Kotlin + Ktor]
     W -->|mismo origen<br/>HTTPS REST / WSS| K
@@ -50,7 +50,8 @@ backend-ktor/
 └── src/main/kotlin/<paquete>/
     ├── application/          # Arranque de Ktor, configuración y routing raíz
     ├── shared/                # Tipos comunes, errores, paginación, métricas
-    ├── auth/                  # Sesiones y autorización de administradores
+    ├── auth/                  # Autenticación y sesiones de vecinos y administradores
+    ├── users/                 # Registro, perfil mínimo y reportes propios del vecino
     ├── reports/               # Alta, consulta, detalle y ciclo de vida
     ├── assignments/           # Equipos, responsables y delegación operativa
     ├── categories/            # Catálogo de categorías
@@ -64,6 +65,31 @@ Las responsabilidades y contratos de cada módulo están en [02-modulos-backend.
 
 ## Flujos principales
 
+### Alta de reporte asociado a una cuenta
+
+```mermaid
+sequenceDiagram
+    actor Vecino
+    participant Android
+    participant Ktor
+    participant DB as PostgreSQL/PostGIS
+    participant WS as Suscriptores WebSocket
+
+    Vecino->>Android: Se registra o inicia sesión
+    Android->>Ktor: POST /api/v1/users/register o /users/login
+    Ktor->>DB: Crea/verifica usuario y sesión revocable
+    Ktor-->>Android: Token de sesión opaco
+    Vecino->>Android: Completa el reporte en modo cuenta
+    Android->>Ktor: POST /api/v1/reports (Bearer + multipart)
+    Ktor->>Ktor: Obtiene userId de la sesión y valida contenido
+    Ktor->>DB: Inserta reporte con user_id + imagen en una transacción
+    DB-->>Ktor: Commit confirmado
+    Ktor->>WS: Publica report.created sin identidad del vecino
+    Ktor-->>Android: 201 + id + estado inicial, sin trackingCode
+```
+
+El cliente nunca envía el identificador del vecino. El backend obtiene `user_id` exclusivamente de la sesión autenticada. El reporte aparece en `GET /api/v1/users/me/reports`.
+
 ### Alta de reporte anónimo
 
 ```mermaid
@@ -75,7 +101,7 @@ sequenceDiagram
     participant WS as Suscriptores WebSocket
 
     Vecino->>Android: Selecciona punto y completa formulario
-    Android->>Ktor: POST /api/v1/reports (multipart)
+    Android->>Ktor: POST /api/v1/reports (multipart, submissionMode=anonymous)
     Ktor->>Ktor: Valida campos, ubicación y fotografía
     Ktor->>Ktor: Genera código opaco y calcula hash
     Ktor->>Ktor: Valida y normaliza fotografía, si existe
@@ -86,7 +112,7 @@ sequenceDiagram
     Android-->>Vecino: Muestra, copia y recomienda guardar el código
 ```
 
-El reporte y su imagen se confirman en la misma transacción. Nunca se responde éxito si el binario, sus metadatos o el reporte no quedaron persistidos de forma coherente.
+El reporte y su imagen se confirman en la misma transacción. Nunca se responde éxito si el binario, sus metadatos o el reporte no quedaron persistidos de forma coherente. Un reporte anónimo queda con `user_id = NULL`; no puede vincularse posteriormente a una cuenta. Si un vecino autenticado elige modo anónimo, su sesión no se asocia al reporte.
 
 ### Cambio de estado administrativo
 
@@ -163,5 +189,6 @@ La terminación TLS puede estar en el proxy o en la plataforma de despliegue. El
 - El backend no contiene lógica de presentación de Compose.
 - Android no accede a PostgreSQL directamente.
 - El panel no ejecuta consultas SQL ni usa credenciales de infraestructura.
+- La identidad de un vecino registrado no se incluye en mapas, listados públicos ni eventos WebSocket.
 - Las fotografías no atraviesan WebSocket; el evento solo notifica que el reporte cambió.
 - WebSocket no reemplaza REST: REST es la fuente de lectura inicial y WebSocket comunica cambios.

@@ -58,7 +58,7 @@ Esta decisión se conserva como registro histórico y no debe implementarse en e
 
 **Estado:** Aprobada para MVP.
 
-**Decisión:** Cada reporte anónimo recibe un código aleatorio, no secuencial y sin cuenta de vecino.
+**Decisión:** Cada reporte anónimo recibe un código aleatorio y no secuencial, sin asociación a una cuenta. Esta decisión se complementa con ADR-011.
 
 **Motivo:** Mantiene baja la fricción de alta y permite consultar el estado.
 
@@ -103,3 +103,13 @@ Esta decisión se conserva como registro histórico y no debe implementarse en e
 **Motivo:** El proyecto requiere que la base de datos contenga las imágenes. Para el alcance inicial, una única transacción y un único mecanismo de backup simplifican consistencia y recuperación.
 
 **Consecuencia:** Los listados nunca seleccionan la columna binaria, las imágenes se entregan desde endpoints dedicados y los backups incluyen evidencia fotográfica. Se deben medir crecimiento, I/O y restauración. Si el volumen futuro supera los límites operativos, una nueva ADR podrá introducir almacenamiento de objetos detrás del mismo módulo `media`.
+
+## ADR-011 — Cuenta opcional del vecino y autoría excluyente
+
+**Estado:** Aprobada.
+
+**Decisión:** Incorporar `users` y sesiones revocables para que un vecino pueda conservar reportes en su cuenta. El alta ofrece dos modos explícitos: `account` y `anonymous`. En la base, un reporte registrado tiene `user_id` y no tiene código; un reporte anónimo tiene código y `user_id = NULL`.
+
+**Motivo:** La cuenta facilita consultar varios reportes sin administrar códigos, mientras la alternativa anónima mantiene accesibilidad y privacidad para quien no quiera registrarse.
+
+**Consecuencia:** Android incorpora registro, login y `Mis reportes`. El backend deriva la identidad desde la sesión, impide combinar cuenta y código mediante una restricción y nunca publica la identidad del autor. Elegir modo anónimo es irreversible: el reporte no se vincula posteriormente a una cuenta.

@@ -13,6 +13,7 @@ import com.mapaurbano.notifications.api.webSocketRoutes
 import com.mapaurbano.reports.api.adminReportRoutes
 import com.mapaurbano.reports.api.publicReportRoutes
 import com.mapaurbano.statistics.api.statisticsRoutes
+import com.mapaurbano.users.api.userRoutes
 import io.ktor.server.application.Application
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
@@ -25,6 +26,7 @@ fun Application.configureRouting() {
             publicCategoryRoutes()
             publicReportRoutes()
             publicImageRoutes()
+            userRoutes()
             authRoutes()
             webSocketRoutes()
 

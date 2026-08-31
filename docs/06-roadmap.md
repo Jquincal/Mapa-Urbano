@@ -12,7 +12,7 @@ Las horas son estimaciones iniciales. Cada tarea está dimensionada para una ent
 |---|---|---|
 | H0 — Documentación aprobada | Contratos, modelo, UX y operación alineados. | Se cierran las preguntas de `00-estado-y-alcance.md`. |
 | H1 — Fundación ejecutable | Ktor, Docker, configuración y health checks. | Backend arranca localmente y valida dependencias. |
-| H2 — Reportes persistentes | PostgreSQL/PostGIS, categorías y CRUD público. | Se puede crear y consultar un reporte con ubicación. |
+| H2 — Usuarios y reportes persistentes | PostgreSQL/PostGIS, cuentas de vecinos, categorías y reportes registrados/anónimos. | Ambos modos de alta respetan su regla de autoría. |
 | H3 — Evidencia y seguimiento | Imágenes `BYTEA`, endpoint binario y código anónimo. | Un vecino recibe su código y la evidencia persiste con el reporte. |
 | H4 — Panel administrativo | Login, tabla, mapa, filtros, estado, prioridad y delegación. | Un admin gestiona y asigna un reporte end-to-end. |
 | H5 — Android | Mapa, alta, fotografía y seguimiento. | Flujo principal probado en un dispositivo real. |
@@ -46,10 +46,13 @@ Estado: en progreso en esta entrega.
 | Tarea | Esfuerzo | Responsable sugerido | Dependencia | Terminado cuando |
 |---|---:|---|---|---|
 | Crear migración base y extensión PostGIS | 4 h | Backend/DB | H1 | La base crea el esquema en un entorno limpio. |
+| Crear `users`, `user_sessions` e índices | 5 h | Backend/DB | Migración base | Correo y token son únicos; las sesiones pueden revocarse. |
+| Implementar registro, login y logout de vecinos | 8 h | Backend | Usuarios + sesiones | Contraseñas y tokens solo se almacenan como hash. |
 | Insertar categorías iniciales idempotentes | 2 h | Backend/DB | Migración base | Repetir la migración no duplica categorías. |
 | Implementar repositorio geoespacial | 6 h | Backend/DB | PostGIS | Búsqueda por `bbox` usa índice espacial. |
-| Implementar alta pública con validación | 6 h | Backend | Esquema | Devuelve `201`, estado inicial y código. |
+| Implementar alta en modo cuenta o anónimo | 8 h | Backend | Esquema + auth vecino | Cuenta deriva `user_id` de sesión; anónimo devuelve código. |
 | Implementar detalle y listado paginado | 6 h | Backend | Alta | Los límites evitan descargas ilimitadas. |
+| Implementar `Mis reportes` con control de pertenencia | 5 h | Backend | Auth vecino + alta | Ninguna cuenta consulta reportes privados de otra. |
 | Implementar historial de estado | 4 h | Backend | Reportes | Cada transición queda asociada a un actor. |
 
 ## Fase 3 — Media y seguimiento anónimo
@@ -82,10 +85,12 @@ Estado: en progreso en esta entrega.
 | Tarea | Esfuerzo | Responsable sugerido | Dependencia | Terminado cuando |
 |---|---:|---|---|---|
 | Crear navegación y tema Compose | 6 h | Android | H0 | Las pantallas base respetan el sistema visual. |
+| Implementar registro, login y almacenamiento seguro de sesión | 8 h | Android | API de usuarios | La sesión se restaura y revoca correctamente. |
 | Implementar mapa y consulta REST | 8 h | Android | SDK mapa + API | Carga marcadores dentro de la vista. |
 | Implementar formulario y validación | 8 h | Android | API de alta | Los errores no borran los datos del formulario. |
 | Implementar cámara/galería y previsualización | 6 h | Android | Media | El usuario ve y puede reemplazar la foto. |
-| Implementar confirmación y copia de código | 4 h | Android | Alta | El código se muestra completo una sola vez. |
+| Implementar elección de modo y confirmación | 6 h | Android | Alta | Cuenta abre `Mis reportes`; anónimo muestra el código una sola vez. |
+| Implementar listado `Mis reportes` | 6 h | Android | Sesión + API propia | Muestra exclusivamente reportes asociados a la cuenta. |
 | Implementar seguimiento por código | 6 h | Android | Endpoint público | El vecino ve estado e historial público. |
 | Probar tamaños, permisos y estados offline | 6 h | Android/QA | Flujos | No hay scroll horizontal ni dead ends. |
 
@@ -130,6 +135,8 @@ Reportes + commit confirmado ──→ Eventos ──→ WebSocket
 | Reglas de delegación o prioridad no están acordadas | Alto | Media | Cerrar equipos, permisos, valores y conflictos antes del sprint administrativo. |
 | Servicio de tiles limita o cambia condiciones | Alto | Media | Elegir proveedor con límites documentados y plan alternativo. |
 | Código de seguimiento perdido | Alto | Media | Mostrarlo una sola vez con copiar/compartir y explicar la consecuencia. |
+| Exposición o asociación accidental de identidad | Alto | Media | Derivar usuario de sesión, `CHECK` de autoría y excluir identidad de contratos públicos/WS. |
+| Robo de sesión del vecino | Alto | Media | Token opaco con hash, expiración, revocación y almacenamiento seguro en Android. |
 | Crecimiento de imágenes degrada la base o backups | Alto | Media | Límite de 5 MB, consultas sin binario, métricas de volumen y pruebas periódicas de restore. |
 | Muchas conexiones WebSocket | Medio | Baja | Límites, heartbeat, escalado horizontal y re-sincronización REST. |
 | Datos sensibles en logs o auditoría | Alto | Baja | Lista explícita de campos prohibidos y revisión automatizada. |

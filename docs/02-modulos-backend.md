@@ -12,8 +12,9 @@
 
 | Módulo | Responsabilidad MVP | Dependencias principales |
 |---|---|---|
-| `auth` | Login, logout, sesión y autorización de administradores | `audit`, `shared` |
-| `reports` | Crear, listar, consultar, priorizar y cambiar estado de reportes | `categories`, `media`, `notifications`, `audit` |
+| `auth` | Login, logout y sesiones revocables de vecinos y administradores | `users`, `audit`, `shared` |
+| `users` | Registro, perfil mínimo y consulta privada de reportes propios | `auth`, `reports`, `audit`, `shared` |
+| `reports` | Crear reportes registrados o anónimos, listar, consultar, priorizar y cambiar estado | `users`, `categories`, `media`, `notifications`, `audit` |
 | `assignments` | Equipos, integrantes, asignación y reasignación de reportes | `auth`, `reports`, `notifications`, `audit` |
 | `categories` | Catálogo activo de tipos de problema | `shared` |
 | `media` | Validar, normalizar, persistir y entregar imágenes desde PostgreSQL | `reports`, `shared` |
@@ -25,18 +26,36 @@
 
 ### Casos de uso
 
-- Iniciar sesión con usuario y contraseña.
+- Iniciar sesión como vecino con correo y contraseña.
+- Iniciar sesión como administrador con usuario y contraseña.
 - Crear, desactivar o rotar credenciales de administrador mediante una operación operativa segura.
-- Consultar la sesión actual.
-- Cerrar sesión e invalidar la sesión.
+- Consultar y cerrar la sesión correspondiente.
 
 ### Reglas
 
 - Las contraseñas se guardan con un algoritmo de hash adaptativo aprobado, nunca en texto plano.
 - La sesión del panel usa cookie `HttpOnly`, `Secure` y `SameSite=Lax`.
+- Android usa un token de sesión opaco, revocable y de duración limitada enviado como Bearer; solo se guarda su hash en PostgreSQL y el dispositivo conserva el valor en almacenamiento seguro.
 - Los mensajes de login fallido son genéricos.
 - Se aplica rate limit por IP y usuario lógico.
 - Las operaciones administrativas requieren una sesión activa y un permiso explícito.
+
+## `users`
+
+### Casos de uso
+
+- Registrar un vecino con correo, nombre visible y contraseña.
+- Consultar los datos mínimos de la cuenta autenticada.
+- Listar y consultar los reportes creados en modo cuenta.
+- Desactivar una cuenta sin borrar los reportes ni romper su trazabilidad.
+
+### Reglas
+
+- El correo se normaliza y es único sin distinguir mayúsculas.
+- La API nunca devuelve `password_hash`, hashes de sesión ni datos de otros vecinos.
+- Un reporte se considera registrado únicamente cuando `reports.user_id` proviene de una sesión válida.
+- Desactivar la cuenta revoca todas sus sesiones; la política de anonimización definitiva se aprobará antes de producción.
+- Los reportes anónimos no se recuperan ni se vinculan posteriormente a una cuenta, aunque hayan sido creados mientras existía una sesión.
 
 ## `reports`
 
@@ -44,7 +63,9 @@
 
 - Listar reportes por ventana geográfica, categoría, estado y cursor.
 - Obtener el detalle público de un reporte.
-- Crear un reporte anónimo con código de seguimiento.
+- Crear un reporte asociado a la cuenta autenticada, sin código de seguimiento.
+- Crear un reporte anónimo con código de seguimiento, con o sin una sesión presente.
+- Listar los reportes propios de un vecino autenticado sin exponerlos a otras cuentas.
 - Consultar un reporte por código de seguimiento sin revelar si otro código existe.
 - Obtener el detalle administrativo.
 - Cambiar el estado con historial.
@@ -61,6 +82,9 @@
 - Descripción: longitud mínima y máxima a definir antes de la migración.
 - La coordenada debe estar dentro del área operativa configurada.
 - El código de seguimiento es aleatorio, no contiene el ID y se muestra al vecino una sola vez en la respuesta de alta.
+- `user_id` y `tracking_code_hash` son alternativas excluyentes: un reporte registrado tiene el primero; uno anónimo tiene el segundo.
+- El cliente declara `submissionMode=account` o `submissionMode=anonymous`. El modo cuenta exige sesión; el modo anónimo ignora la identidad de cualquier sesión presente.
+- El backend nunca acepta `userId` dentro del formulario de alta.
 - Un mismo reporte puede tener cero o más imágenes; la primera versión admite como máximo una fotografía.
 
 ## `assignments`
@@ -144,6 +168,7 @@ Las notificaciones push móviles quedan fuera del MVP. El módulo se diseña par
 Registra como mínimo:
 
 - Login exitoso y fallido.
+- Registro, login y revocación de sesiones de vecinos.
 - Logout.
 - Creación, cambio de estado y eliminación de reportes.
 - Cambios de asignación, prioridad y fecha objetivo.
@@ -162,5 +187,7 @@ Cada evento incluye actor, acción, entidad, identificador, fecha, IP normalizad
 | `ReportAssignmentChanged` | `assignments` | `notifications`, `statistics`, `audit` | Después del commit |
 | `ReportDeleted` | `reports` | `notifications`, `statistics`, `audit` | Después del commit |
 | `AdminAuthenticated` | `auth` | `audit` | Después de crear sesión |
+| `UserRegistered` | `users` | `audit` | Después del commit |
+| `UserAuthenticated` | `auth` | `audit` | Después de crear sesión |
 
 Si la entrega de WebSocket falla, no se revierte la transacción de negocio. El cliente vuelve a sincronizar por REST al reconectarse.

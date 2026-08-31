@@ -27,6 +27,21 @@
 
 Los mensajes de autenticación y seguimiento no deben confirmar si un usuario, reporte o código existe.
 
+## Cuenta del vecino
+
+Las cuentas de vecinos son independientes de las cuentas municipales. Android envía un token opaco en `Authorization: Bearer <token>`; el servidor almacena únicamente su hash y puede revocarlo.
+
+| Método y ruta | Propósito | Autorización |
+|---|---|---|
+| `POST /api/v1/users/register` | Registrar un vecino y crear su primera sesión. | Pública con rate limit. |
+| `POST /api/v1/users/login` | Iniciar una sesión de vecino. | Pública con rate limit. |
+| `POST /api/v1/users/logout` | Revocar la sesión actual. | Bearer de vecino. |
+| `GET /api/v1/users/me` | Consultar el perfil mínimo propio. | Bearer de vecino. |
+| `GET /api/v1/users/me/reports` | Listar reportes creados en modo cuenta. | Bearer de vecino. |
+| `GET /api/v1/users/me/reports/{id}` | Consultar un reporte propio y su historial público. | Bearer de vecino y pertenencia. |
+
+El registro recibe `email`, `displayName` y `password`. Registro y login pueden devolver el token completo una sola vez; nunca devuelven hashes. Los errores de correo duplicado y credenciales inválidas deben evitar enumeración innecesaria, y los límites de contraseña se fijarán en el contrato de validación antes de implementar.
+
 ## Endpoints públicos
 
 | Método y ruta | Propósito | Respuesta esperada |
@@ -35,7 +50,7 @@ Los mensajes de autenticación y seguimiento no deben confirmar si un usuario, r
 | `GET /api/v1/reports?bbox=...&status=...&category=...` | Obtener marcadores dentro del área visible. | `200` paginado o limitado. |
 | `GET /api/v1/reports/{id}` | Ver detalle público de un reporte. | `200`, `404` genérico si no está disponible. |
 | `GET /api/v1/reports/{id}/image` | Obtener la imagen de un reporte públicamente visible. | `200` binario, `404` genérico si no está disponible. |
-| `POST /api/v1/reports` | Crear reporte anónimo; acepta `multipart/form-data`. | `201` con código completo una sola vez. |
+| `POST /api/v1/reports` | Crear un reporte en modo cuenta o anónimo; acepta `multipart/form-data`. | `201`; el código aparece solo en modo anónimo. |
 | `POST /api/v1/report-status` | Consultar estado usando `trackingCode` en el cuerpo. | `200` con estado e historial público. |
 | `GET /health/live` | Verificar proceso. | `200` si el proceso vive. |
 | `GET /health/ready` | Verificar dependencias esenciales. | `200` o `503`. |
@@ -51,20 +66,39 @@ Campos mínimos de `multipart/form-data`:
 | `categorySlug` | texto | Sí |
 | `latitude` | decimal | Sí |
 | `longitude` | decimal | Sí |
+| `submissionMode` | `account` o `anonymous` | Sí |
 | `photo` | archivo | No |
 
-Respuesta conceptual:
+Reglas de autoría:
+
+- `submissionMode=account` exige un Bearer válido. El backend toma el usuario de la sesión y rechaza cualquier campo `userId`.
+- `submissionMode=anonymous` funciona sin sesión. Si se envía una sesión, no se guarda ninguna relación con ella.
+- Un reporte anónimo no puede incorporarse más tarde a “Mis reportes”.
+
+Respuesta conceptual en modo cuenta:
 
 ```json
 {
   "id": "4f4a2c86-4a2b-4ad5-86d9-3cf4f2c7a100",
+  "submissionMode": "account",
+  "status": "pending",
+  "createdAt": "2026-08-26T21:30:00Z"
+}
+```
+
+Respuesta conceptual en modo anónimo:
+
+```json
+{
+  "id": "4f4a2c86-4a2b-4ad5-86d9-3cf4f2c7a100",
+  "submissionMode": "anonymous",
   "trackingCode": "7F2K-9B1M-4X3P",
   "status": "pending",
   "createdAt": "2026-08-26T21:30:00Z"
 }
 ```
 
-El cliente debe mostrar el código con acción de copiar y una advertencia: si se pierde, no existe una cuenta de vecino para recuperarlo en el MVP.
+El cliente muestra el código únicamente para el modo anónimo, con acción de copiar y una advertencia: si se pierde, no existe recuperación ni vinculación posterior. En modo cuenta, la confirmación ofrece acceso a `Mis reportes`.
 
 ### Consulta por seguimiento
 
@@ -82,9 +116,9 @@ La respuesta incluye solo información pública: estado actual, categoría, ubic
 
 | Método y ruta | Propósito | Autorización |
 |---|---|---|
-| `POST /api/v1/auth/login` | Crear sesión del administrador. | Pública con rate limit. |
-| `POST /api/v1/auth/logout` | Invalidar sesión. | Sesión válida. |
-| `GET /api/v1/auth/me` | Consultar administrador actual. | Sesión válida. |
+| `POST /api/v1/auth/login` | Crear sesión del administrador. | Pública con rate limit; no se usa para vecinos. |
+| `POST /api/v1/auth/logout` | Invalidar sesión administrativa. | Sesión administrativa válida. |
+| `GET /api/v1/auth/me` | Consultar administrador actual. | Sesión administrativa válida. |
 | `GET /api/v1/admin/reports` | Tabla paginada con filtros por estado, categoría, prioridad, equipo, responsable y fecha objetivo. | Sesión válida. |
 | `GET /api/v1/admin/reports/{id}` | Detalle completo y metadatos de imagen. | Sesión válida. |
 | `GET /api/v1/admin/reports/{id}/image` | Obtener la imagen aunque el reporte no sea público. | Sesión válida y permiso. |
@@ -190,6 +224,9 @@ Tipos mínimos: `connected`, `report.created`, `report.updated`, `report.assignm
 ## Límites y seguridad de API
 
 - Rate limit para alta de reportes, consulta por código, login y subida de archivos.
+- Rate limit para registro de cuentas y separación estricta entre sesión de vecino y sesión administrativa.
+- El identificador del autor registrado se deriva del Bearer; nunca se confía en `userId` recibido del cliente.
+- Ningún endpoint público o evento WebSocket devuelve `userId`, correo o nombre del autor.
 - Límite de tamaño de request multipart menor o igual al límite operativo acordado.
 - CORS restringido; el panel servido por Ktor usa mismo origen.
 - Protección CSRF para operaciones basadas en cookie.

@@ -8,7 +8,7 @@ Este documento define qué debe conocer cada integrante, qué entregables conduc
 
 Todo el equipo debe comprender, como mínimo:
 
-- Objetivo del producto, usuarios, alcance del MVP y flujos ciudadano/administrativo.
+- Objetivo del producto, cuentas opcionales, modo anónimo y flujos ciudadano/administrativo.
 - Arquitectura Android + Angular + Ktor + PostgreSQL/PostGIS, incluidas imágenes `BYTEA`.
 - Flujo básico de Git, pull requests, revisión y resolución de conflictos simples.
 - Fundamentos de HTTP, JSON, códigos de estado y contrato de API.
@@ -30,7 +30,7 @@ Todo el equipo debe comprender, como mínimo:
 
 - Mantener alcance, backlog, prioridades, objetivos de sprint y registro de decisiones.
 - Cerrar contratos junto con Juan y Aldana antes de que dependan de ellos las interfaces.
-- Liderar Android: mapa, alta, foto, confirmación y seguimiento.
+- Liderar Android: registro/login, mapa, alta registrada o anónima, foto, `Mis reportes` y seguimiento.
 - Revisar cambios de arquitectura e integración y resolver bloqueos de alcance.
 - Coordinar demos, staging y decisión de salida de cada versión.
 
@@ -57,7 +57,7 @@ Apoyo principal: Mauro en Android y operación; Juan en backend; Aldana en datos
 ### Responsabilidades
 
 - Crear la base ejecutable de Ktor, configuración, logging, errores y health checks.
-- Implementar auth, reportes, categorías, asignaciones, prioridad, media, estadísticas, notificaciones y auditoría.
+- Implementar auth de vecinos/administradores, usuarios, reportes, categorías, asignaciones, prioridad, media, estadísticas, notificaciones y auditoría.
 - Publicar eventos solo después del commit y sin datos sensibles.
 - Mantener ejemplos de request/response y acompañar la integración de ambos clientes.
 - Cubrir reglas y endpoints críticos con pruebas automatizadas.
@@ -86,7 +86,7 @@ Apoyo principal: Aldana en persistencia, Joaquín en arquitectura y seguridad, S
 ### Responsabilidades
 
 - Diseñar y mantener el esquema relacional/geoespacial.
-- Crear migraciones para reportes, usuarios, equipos, asignaciones, prioridad, adjuntos e historial.
+- Crear migraciones para `users`, sesiones, reportes registrados/anónimos, administradores, equipos, asignaciones, prioridad, adjuntos e historial.
 - Definir índices y medir las consultas de mapa, filtros y estadísticas.
 - Preparar datos de prueba realistas y verificaciones de integridad.
 - Ejecutar y documentar una restauración completa en staging.

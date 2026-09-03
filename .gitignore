@@ -39,6 +39,7 @@ secrets/
 .kotlin/
 **/.kotlin/
 **/build/
+**/bin/
 **/out/
 *.class
 *.apk

@@ -35,7 +35,7 @@ Las hipótesis de usuario se deben validar antes de congelar textos o prioridade
 - **Confirmación:** acceso a `Mis reportes` en modo cuenta; código con `Copiar` y `Compartir` en modo anónimo.
 - **Mis reportes:** listado privado de reportes asociados a la cuenta y acceso a su estado.
 - **Seguimiento:** ingreso del código, estado actual e historial público.
-- **Cuenta:** perfil mínimo y cierre de sesión.
+- **Cuenta:** perfil mínimo, cierre de sesión y desactivación con confirmación explícita.
 - **Detalle:** categoría, descripción, fecha, ubicación y fotografía cuando corresponda.
 
 ### Panel web
@@ -90,6 +90,10 @@ Si la sesión expira, la aplicación conserva el formulario localmente, solicita
 4. **Confirmación** → copia o comparte el código → entra a **Seguimiento**.
 
 Si existe una sesión, antes de enviar se informa: “Este reporte no aparecerá en Mis reportes y no podremos vincularlo después”. Las acciones son `Continuar anónimamente` y `Guardar en mi cuenta`.
+
+### Flow: desactivar cuenta
+
+La acción `Desactivar mi cuenta` exige una confirmación específica: informa que se cerrarán todas las sesiones y que los reportes se conservarán según la política municipal. Nunca se ejecuta desde un botón genérico ni elimina reportes automáticamente.
 
 #### Estados de error y recuperación
 

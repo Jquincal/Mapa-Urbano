@@ -20,7 +20,9 @@ repositories {
     mavenCentral()
 }
 
-val exposedVersion = "0.58.0"
+val exposedVersion = "1.5.0"
+val flywayVersion = "13.2.0"
+val testcontainersVersion = "2.0.5"
 
 dependencies {
     // Ktor server
@@ -37,8 +39,10 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
-    implementation("com.zaxxer:HikariCP:6.1.0")
-    implementation("org.postgresql:postgresql:42.7.4")
+    implementation("com.zaxxer:HikariCP:7.0.2")
+    implementation("org.postgresql:postgresql:42.7.13")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 
     // Security – password hashing
     implementation("at.favre.lib:bcrypt:0.10.2")
@@ -46,14 +50,12 @@ dependencies {
     // Logging
     implementation("ch.qos.logback:logback-classic:1.5.33")
 
-    // H2 for development/test (PostgreSQL compatibility mode)
-    runtimeOnly("com.h2database:h2:2.3.232")
-
     // Testing
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("io.ktor:ktor-client-content-negotiation")
-    testImplementation("com.h2database:h2:2.3.232")
+    testImplementation("org.testcontainers:testcontainers-postgresql:$testcontainersVersion")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:$testcontainersVersion")
 }
 
 tasks.test {

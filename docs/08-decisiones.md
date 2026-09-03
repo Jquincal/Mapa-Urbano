@@ -113,3 +113,13 @@ Esta decisión se conserva como registro histórico y no debe implementarse en e
 **Motivo:** La cuenta facilita consultar varios reportes sin administrar códigos, mientras la alternativa anónima mantiene accesibilidad y privacidad para quien no quiera registrarse.
 
 **Consecuencia:** Android incorpora registro, login y `Mis reportes`. El backend deriva la identidad desde la sesión, impide combinar cuenta y código mediante una restricción y nunca publica la identidad del autor. Elegir modo anónimo es irreversible: el reporte no se vincula posteriormente a una cuenta.
+
+## ADR-012 — Migraciones y pruebas sobre PostgreSQL/PostGIS real
+
+**Estado:** Aprobada.
+
+**Decisión:** Versionar el esquema con Flyway y ejecutar las pruebas de integración de persistencia contra PostgreSQL con PostGIS mediante Testcontainers. H2 no se usará como sustituto de PostgreSQL.
+
+**Motivo:** El modelo depende de `geography`, índices GIST, `BYTEA`, restricciones e instrucciones específicas de PostgreSQL. El modo de compatibilidad de H2 no reproduce esas capacidades con fidelidad y podría ocultar errores de migración o consultas.
+
+**Consecuencia:** Las pruebas de rutas que no acceden a datos continúan usando el host de pruebas de Ktor. Las pruebas de repositorios y migraciones requieren Docker y una imagen de PostgreSQL con PostGIS fijada por versión; CI debe ejecutar Flyway desde una base vacía antes de validar los casos de integración.

@@ -20,7 +20,12 @@ repositories {
     mavenCentral()
 }
 
+val exposedVersion = "1.5.0"
+val flywayVersion = "13.2.0"
+val testcontainersVersion = "2.0.5"
+
 dependencies {
+    // Ktor server
     implementation("io.ktor:ktor-server-core")
     implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-server-content-negotiation")
@@ -28,10 +33,29 @@ dependencies {
     implementation("io.ktor:ktor-server-call-logging")
     implementation("io.ktor:ktor-server-status-pages")
     implementation("io.ktor:ktor-server-websockets")
+    implementation("io.ktor:ktor-server-cors")
+
+    // Database – Exposed ORM + connection pool
+    implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
+    implementation("com.zaxxer:HikariCP:7.0.2")
+    implementation("org.postgresql:postgresql:42.7.13")
+    implementation("org.flywaydb:flyway-core:$flywayVersion")
+    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
+
+    // Security – password hashing
+    implementation("at.favre.lib:bcrypt:0.10.2")
+
+    // Logging
     implementation("ch.qos.logback:logback-classic:1.5.33")
 
+    // Testing
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host")
+    testImplementation("io.ktor:ktor-client-content-negotiation")
+    testImplementation("org.testcontainers:testcontainers-postgresql:$testcontainersVersion")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter:$testcontainersVersion")
 }
 
 tasks.test {

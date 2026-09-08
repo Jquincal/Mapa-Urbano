@@ -6,6 +6,22 @@ Construir un MVP operable con Android, panel web Angular y backend compartido, m
 
 Las horas son estimaciones iniciales. Cada tarea está dimensionada para una entrega de 2 a 8 horas y debe recalibrarse después de cerrar las decisiones abiertas.
 
+## Avance al 8 de septiembre de 2026
+
+Las tablas de fases conservan el plan y sus criterios de aceptación. El avance verificado es:
+
+| Área del plan | Avance | Trabajo pendiente |
+|---|---|---|
+| H1 — Fundación | Ktor, módulos, rutas y pruebas de contrato iniciales. | Imagen Docker, configuración de servicio y readiness real. |
+| H2 — Persistencia | V1 crea el esquema e índices; V2 carga categorías sin duplicar. | Repositorios, auth, alta, consultas y permisos. |
+| H3 — Evidencia | `report_images`, imagen única y límites de metadatos/binario probados. | Decodificación de imágenes, alta transaccional y endpoint autorizado. |
+| H4 — Administración | Tablas de equipos, asignaciones, prioridad e historial disponibles. | Casos de uso, concurrencia, permisos e interfaz. |
+| H7 — Calidad y operación | CI con Testcontainers, rollback y restauración de datos sintéticos. | Staging, backups administrados y medición con datos representativos. |
+
+El esquema y sus pruebas pertenecen a [MU-205 / PR #6](https://github.com/Jquincal/Mapa-Urbano/pull/6),
+pendiente de revisión y fusión. Ningún hito completo se da por terminado solo por disponer de las tablas.
+Ver [estado y evidencia](00-estado-y-alcance.md#estado-de-implementación-y-evidencia).
+
 ## Hitos
 
 | Hito | Resultado | Criterio de salida |

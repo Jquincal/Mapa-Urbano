@@ -2,6 +2,13 @@
 
 El modelo detallado y un DDL inicial de referencia están en [12-entidades-bd-ejemplo.md](12-entidades-bd-ejemplo.md).
 
+Estado al 8 de septiembre de 2026: MU-205 implementa este esquema mediante
+[V1](../database/migrations/V1__create_initial_schema.sql) y las categorías iniciales mediante
+[V2](../database/migrations/V2__seed_initial_categories.sql). Las pruebas de integridad,
+rollback y restauración se ejecutan con PostgreSQL/PostGIS real. El
+[procedimiento operativo](../database/README.md) distingue las restricciones de la base de
+las reglas transaccionales que todavía debe implementar el backend.
+
 ## Principios
 
 - PostgreSQL es la fuente de verdad transaccional.
@@ -357,3 +364,7 @@ Las coordenadas de respuesta se serializan como `latitude` y `longitude`. La bas
 5. Insertar categorías iniciales de manera idempotente.
 6. Crear el primer administrador por un procedimiento seguro fuera de los commits de código.
 7. Ejecutar una prueba de rollback y una restauración en un entorno descartable.
+
+V1/V2 implementan los pasos de esquema, índices y categorías. CI comprueba el rollback
+de una migración fallida y la restauración de un backup en otra base descartable.
+La creación segura del primer administrador y la operación en staging siguen pendientes.

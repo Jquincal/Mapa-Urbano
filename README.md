@@ -2,7 +2,7 @@
 
 Plataforma cívica para registrar, ubicar y dar seguimiento a problemas de infraestructura urbana.
 
-El repositorio reúne la documentación técnica, el diseño del producto y los directorios reservados para cada aplicación. Las implementaciones se incorporarán mediante ramas de tarea y pull requests.
+El repositorio reúne la documentación técnica, el diseño del producto, la base ejecutable de Ktor y las migraciones PostgreSQL/PostGIS. Las entregas se integran mediante ramas de tarea y pull requests.
 
 ## Arquitectura objetivo
 
@@ -56,6 +56,9 @@ La fuente de verdad son los archivos Markdown dentro de `docs/`. Los PDF de trab
 
 ## Estado actual
 
+Actualizado al 8 de septiembre de 2026. El esquema y sus pruebas están implementados en
+el [PR #6 — MU-205](https://github.com/Jquincal/Mapa-Urbano/pull/6), pendiente de revisión y fusión en `develop`.
+
 | Área | Estado |
 |---|---|
 | Revisión del documento original | Completa |
@@ -64,5 +67,12 @@ La fuente de verdad son los archivos Markdown dentro de `docs/`. Los PDF de trab
 | Mockups de interfaces | Incluidos |
 | Diseño de interfaz | Documentado mediante mockups |
 | Fundación ejecutable del backend y rutas base | Completa |
+| Esquema PostgreSQL/PostGIS y categorías iniciales | Implementados en V1/V2 de Flyway; probados en CI |
+| Integridad, rollback y restauración de binarios | Verificados con Testcontainers en un entorno descartable |
+| Repositorios, autenticación y persistencia HTTP | Pendientes; rutas de negocio responden `501` |
 | Lógica funcional de panel, backend y Android | Pendiente |
 | Despliegue | Pendiente |
+
+Consultar [estado y próximos pasos](docs/00-estado-y-alcance.md),
+[arranque del backend](backend-ktor/README.md) y
+[migraciones y pruebas de la base](database/README.md).

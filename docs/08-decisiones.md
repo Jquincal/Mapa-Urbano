@@ -123,3 +123,13 @@ Esta decisión se conserva como registro histórico y no debe implementarse en e
 **Motivo:** El modelo depende de `geography`, índices GIST, `BYTEA`, restricciones e instrucciones específicas de PostgreSQL. El modo de compatibilidad de H2 no reproduce esas capacidades con fidelidad y podría ocultar errores de migración o consultas.
 
 **Consecuencia:** Las pruebas de rutas que no acceden a datos continúan usando el host de pruebas de Ktor. Las pruebas de repositorios y migraciones requieren Docker y una imagen de PostgreSQL con PostGIS fijada por versión; CI debe ejecutar Flyway desde una base vacía antes de validar los casos de integración.
+
+## ADR-013 — Interfaz Stitch y navegación del MVP
+
+**Estado:** Aprobada por el solicitante el 8 de septiembre de 2026 para alcance y comportamiento objetivo; implementación Android y validaciones de dispositivo pendientes.
+
+**Decisión:** Usar las versiones interactivas de Mapa y Mis reportes del proyecto Stitch `12550160159359787648` junto con las pantallas completas de formulario, confirmación, seguimiento, acceso y perfil. Preservar estética; permitir solo correcciones de flujo, scroll, transiciones y textos funcionales. Conservar originales como referencias.
+
+**Consecuencia:** Todo destino operativo debe tener acceso y retorno, contexto restaurado y scroll disponible. Cuenta y anonimato siguen siendo excluyentes. Funciones visibles fuera del MVP abren aviso con retorno y no amplían API ni base de datos. El HTML de Stitch es un prototipo; Android seguirá usando Kotlin/Compose. No se considerará conectado un diseño por su título o por una afirmación del generador: se registrarán pruebas y limitaciones en el [informe](13-verificacion-stitch.md).
+
+**Verificación:** Matriz por acción, pruebas de acceso/retorno, scroll con pantalla reducida y comparación visual contra originales. Ver [UX](05-ux-e-interfaces.md).

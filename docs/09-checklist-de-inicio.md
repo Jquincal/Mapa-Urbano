@@ -58,3 +58,19 @@
 3. Decisión documentada del SDK de mapas Android.
 4. Wireframes revisados con resultados de pruebas rápidas.
 5. Backlog técnico priorizado para el Hito H1.
+
+## Aceptación de la interfaz de Stitch y futura implementación Android
+
+- [x] Referencia visual y decisiones de alcance documentadas, sin ampliar el MVP.
+- [x] Matriz de acciones, destinos, retornos, datos conservados y API definida.
+- [x] Originales identificados y capturas versionadas; resultados separados de afirmaciones del generador.
+- [ ] Resolver todas las limitaciones pendientes del [informe](13-verificacion-stitch.md) antes de declarar el prototipo conectado.
+- [ ] Verificar todas las rutas y retornos en Android, incluidos login, registro, perfil, detalle y selector de ubicación.
+- [ ] Probar borrador conservado/descartado, sesión vencida y cuenta/anónimo sin asociación accidental.
+- [ ] Probar scroll con teclado real, altura reducida, 360/390 dp, texto 200% y movimiento reducido.
+- [ ] Confirmar que los últimos campos, acciones, FAB y cierres de diálogos son alcanzables.
+- [ ] Validar un archivo, reemplazo, 5 MB, tipo/firma inválida y permisos denegados en dispositivo y servidor.
+- [ ] Verificar código opaco solo anónimo, mismo reporte en detalle/confirmación y copia/compartir sin éxito falso.
+- [ ] Cerrar contrato de idempotencia antes de cualquier reenvío automático tras resultado incierto.
+- [ ] Sustituir ejemplos municipales por contenido/contacto/área aprobados antes de producción.
+- [ ] Completar pruebas REST/WS y fallos reales; las simulaciones de Stitch no acreditan esos casos.

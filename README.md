@@ -51,6 +51,7 @@ Mapa Urbano/
 11. [Equipo y responsabilidades](docs/10-equipo-y-responsabilidades.md)
 12. [Flujo Git y estrategia de ramas](docs/11-flujo-git-y-ramas.md)
 13. [Entidades de base de datos y DDL de ejemplo](docs/12-entidades-bd-ejemplo.md)
+14. [Verificación de la interfaz en Google Stitch](docs/13-verificacion-stitch.md)
 
 La fuente de verdad son los archivos Markdown dentro de `docs/`. Los PDF de trabajo y exportaciones locales no se versionan.
 
@@ -62,7 +63,11 @@ La fuente de verdad son los archivos Markdown dentro de `docs/`. Los PDF de trab
 | Arquitectura objetivo | Documentada |
 | Contrato inicial de datos y API | Documentado, pendiente de aprobación |
 | Mockups de interfaces | Incluidos |
-| Diseño de interfaz | Documentado mediante mockups |
+| Diseño de interfaz | Referencia Stitch y comportamiento MVP documentados; ver informe de verificación |
 | Fundación ejecutable del backend y rutas base | Completa |
 | Lógica funcional de panel, backend y Android | Pendiente |
 | Despliegue | Pendiente |
+
+## Revisión ciudadana de Stitch — septiembre 2026
+
+La documentación incorpora el inventario visual y la navegación del MVP. Consultar [resultados, capturas y limitaciones del prototipo](docs/13-verificacion-stitch.md) antes de implementar. Las pantallas generadas no acreditan por sí solas conexiones funcionales ni pruebas Android.

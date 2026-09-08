@@ -16,7 +16,12 @@ Esta carpeta es la fuente de verdad de la arquitectura objetivo, el alcance y el
 10. [Equipo y responsabilidades](10-equipo-y-responsabilidades.md)
 11. [Flujo Git y estrategia de ramas](11-flujo-git-y-ramas.md)
 12. [Entidades de base de datos y DDL de ejemplo](12-entidades-bd-ejemplo.md)
+13. [Verificación de la interfaz en Google Stitch](13-verificacion-stitch.md)
 
 ## Regla de alcance
 
 La primera entrega del repositorio publica documentación, diseño y criterios verificables. Los proyectos ejecutables, endpoints, migraciones y flujos productivos se incorporarán mediante las ramas y pull requests definidos en este mismo directorio.
+
+## Revisión ciudadana de Stitch — septiembre 2026
+
+La documentación incorpora el inventario visual y la navegación del MVP. Consultar [resultados, capturas y limitaciones del prototipo](13-verificacion-stitch.md) antes de implementar. Las pantallas generadas no acreditan por sí solas conexiones funcionales ni pruebas Android.

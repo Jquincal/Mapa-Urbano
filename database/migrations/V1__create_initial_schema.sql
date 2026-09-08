@@ -1,22 +1,8 @@
-DROP TABLE IF EXISTS audit_events CASCADE;
-DROP TABLE IF EXISTS report_assignments CASCADE;
-DROP TABLE IF EXISTS report_priority_history CASCADE;
-DROP TABLE IF EXISTS report_status_history CASCADE;
-DROP TABLE IF EXISTS report_images CASCADE;
-DROP TABLE IF EXISTS reports CASCADE;
-DROP TABLE IF EXISTS team_members CASCADE;
-DROP TABLE IF EXISTS teams CASCADE;
-DROP TABLE IF EXISTS user_sessions CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS admin_users CASCADE;
-DROP TABLE IF EXISTS categories CASCADE;
-DROP TYPE IF EXISTS report_status CASCADE;
-DROP TYPE IF EXISTS report_priority CASCADE;
--- 2. Extensiones
+-- Esquema inicial. Flyway registra esta migración una sola vez; no elimina datos.
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS postgis;
 
--- 3. Tipos ENUM limpios
+-- Catálogos cerrados del MVP.
 CREATE TYPE report_status AS ENUM (
     'pending',
     'in_progress',
@@ -30,7 +16,7 @@ CREATE TYPE report_priority AS ENUM (
     'urgent'
 );
 
--- 4. Función genérica para actualizar los 'updated_at' automáticamente
+-- La versión optimista se gestiona en los casos de uso, no en este trigger.
 CREATE OR REPLACE FUNCTION update_timestamp_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -39,7 +25,7 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- 5. Creación de Tablas
+-- Tablas y restricciones.
 CREATE TABLE categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     slug VARCHAR(50) NOT NULL UNIQUE,
@@ -82,8 +68,6 @@ CREATE TABLE users (
     deleted_at TIMESTAMPTZ,
     CONSTRAINT users_email_not_blank_ck
         CHECK (length(btrim(email)) > 0),
-    CONSTRAINT users_email_format_ck
-        CHECK (email ~* '^[A-Za-z0-9._+%-]+@[A-Za-z0-9.-]+[.][A-Za-z]+$'),
     CONSTRAINT users_display_name_not_blank_ck
         CHECK (length(btrim(display_name)) > 0),
     CONSTRAINT users_deactivation_ck
@@ -170,7 +154,7 @@ CREATE TRIGGER update_reports_modtime
 
 CREATE TABLE report_images (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    report_id UUID NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
+    report_id UUID NOT NULL UNIQUE REFERENCES reports(id) ON DELETE CASCADE,
     data BYTEA NOT NULL,
     content_type VARCHAR(100) NOT NULL,
     size_bytes BIGINT NOT NULL,
@@ -230,6 +214,9 @@ CREATE UNIQUE INDEX report_assignments_one_active_uq
     ON report_assignments (report_id)
     WHERE unassigned_at IS NULL;
 
+CREATE INDEX report_assignments_target_idx
+    ON report_assignments (team_id, responsible_admin_user_id);
+
 CREATE TABLE audit_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     actor_admin_user_id UUID REFERENCES admin_users(id),
@@ -244,7 +231,7 @@ CREATE TABLE audit_events (
         CHECK (actor_admin_user_id IS NULL OR actor_user_id IS NULL)
 );
 
--- 6. Índices finales
+-- Índices de consulta.
 CREATE INDEX reports_location_gist_idx ON reports USING GIST (location);
 CREATE INDEX reports_status_created_idx ON reports (status, created_at DESC) WHERE deleted_at IS NULL;
 CREATE INDEX reports_priority_due_idx ON reports (priority, due_at) WHERE deleted_at IS NULL;

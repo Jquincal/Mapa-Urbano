@@ -10,7 +10,7 @@ Se conservan paleta, Inter, iconos, formas, espaciado, jerarquía y distribució
 
 ### Inventario trazable de pantallas de origen
 
-Los IDs siguientes son las referencias previas a la corrección. Las revisiones resultantes y su relación con los originales se registran en el [informe](13-verificacion-stitch.md). No borrar versiones anteriores ni incorporar pantallas ocultas al flujo vigente por su sola presencia en el lienzo.
+Los IDs siguientes son las referencias previas a la corrección. Las revisiones resultantes y su relación con los originales se registran en el [informe](13-verificacion-stitch.md), actualizado el 9 de septiembre. La revisión funcional más avanzada recuperada es `66cfe9c846d34873b347ed0032dacacc`, todavía no aceptada por los pendientes del informe. Conservar las referencias hasta verificar el reemplazo; después retirar del lienzo duplicados y revisiones sin utilidad, según la autorización del solicitante, manteniendo capturas e inventario histórico en Git. No incorporar pantallas ocultas al flujo vigente por su sola presencia en el lienzo.
 
 | Destino lógico | Pantalla en Stitch | ID de origen | Referencia visual |
 |---|---|---|---|

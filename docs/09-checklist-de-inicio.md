@@ -80,6 +80,7 @@ no completa autenticación, endpoints, despliegue ni recuperación de staging.
 - [x] Matriz de acciones, destinos, retornos, datos conservados y API definida.
 - [x] Originales identificados y capturas versionadas; resultados separados de afirmaciones del generador.
 - [ ] Resolver todas las limitaciones pendientes del [informe](13-verificacion-stitch.md) antes de declarar el prototipo conectado.
+- [ ] Tras aceptar el reemplazo, retirar del lienzo pantallas/paneles duplicados o sustituidos y actualizar inventario, conservando las capturas históricas en Git.
 - [ ] Verificar todas las rutas y retornos en Android, incluidos login, registro, perfil, detalle y selector de ubicación.
 - [ ] Probar borrador conservado/descartado, sesión vencida y cuenta/anónimo sin asociación accidental.
 - [ ] Probar scroll con teclado real, altura reducida, 360/390 dp, texto 200% y movimiento reducido.

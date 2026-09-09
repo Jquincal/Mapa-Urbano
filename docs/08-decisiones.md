@@ -124,6 +124,13 @@ Esta decisión se conserva como registro histórico y no debe implementarse en e
 
 **Consecuencia:** Las pruebas de rutas que no acceden a datos continúan usando el host de pruebas de Ktor. Las pruebas de repositorios y migraciones requieren Docker y una imagen de PostgreSQL con PostGIS fijada por versión; CI debe ejecutar Flyway desde una base vacía antes de validar los casos de integración.
 
+**Implementación (MU-205, 8 de septiembre de 2026):** V1/V2 en `database/migrations`,
+empaquetadas como recursos `db/migration`, y comando `migrateDatabase` independiente del
+arranque HTTP. `check` ejecuta rutas e integración con `postgis/postgis:16-3.5`;
+`test` permite comprobar rutas sin Docker. Flyway tiene clean y baseline automático
+deshabilitados. La suite verifica repetición sin pérdida de datos, restricciones,
+rollback y restauración. Ver [operación de base de datos](../database/README.md).
+
 ## ADR-013 — Interfaz Stitch y navegación del MVP
 
 **Estado:** Aprobada por el solicitante el 8 de septiembre de 2026 para alcance y comportamiento objetivo; implementación Android y validaciones de dispositivo pendientes.

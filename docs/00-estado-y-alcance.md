@@ -4,9 +4,33 @@
 
 Este documento adapta el documento original **Mapa Colaborativo de Problemas Urbanos v2.0** a la arquitectura solicitada para Mapa Urbano.
 
-Fecha de revisión: 31 de agosto de 2026.
+Fecha de actualización: 9 de septiembre de 2026.
 
 La carpeta de trabajo se llama `Mapa Urbano`, aunque la ruta solicitada decía `Mapa Urban`. Se trabajó sobre la carpeta existente.
+
+## Estado de implementación y evidencia
+
+MU-205 está implementada en el [PR #6](https://github.com/Jquincal/Mapa-Urbano/pull/6),
+ya integrado en `develop`. Este estado corresponde a esa entrega, no a un despliegue productivo.
+
+| Entrega | Estado verificable |
+|---|---|
+| Fundación Ktor | Módulos y rutas registrados; liveness responde `200`, readiness `503` y negocio `501`. |
+| V1 — Esquema | Doce tablas, PostGIS, enums, restricciones de autoría e imagen única, índices y triggers de `updated_at`. |
+| V2 — Categorías | Seis categorías documentadas; la carga idempotente conserva personalizaciones. |
+| Ejecución de migraciones | `./gradlew migrateDatabase`, configurado por entorno; clean y baseline automático deshabilitados. |
+| Verificación | Pruebas de rutas y once pruebas de base con Testcontainers, incluyendo rollback y backup/restauración. |
+| API persistente | Pendiente: conexión de repositorios, autenticación, validaciones y casos de uso. |
+| Operación | Pendiente: staging, cuenta de aplicación, backups administrados, mediciones de capacidad y RPO/RTO. |
+
+La [ejecución de CI 34286113649](https://github.com/Jquincal/Mapa-Urbano/actions/runs/34286113649)
+verificó el código de MU-205 en `3d873ec`: backend y documentación aprobados. Los informes
+están disponibles como `backend-test-reports`. Las pruebas usan datos sintéticos y una
+base descartable; no acreditan una restauración de staging ni el flujo completo de fotografías.
+
+El [procedimiento de base de datos](../database/README.md) detalla configuración, pruebas
+y adopción de bases preexistentes. El siguiente paso técnico es conectar la persistencia
+al backend e implementar autenticación y alta de reportes respetando los contratos.
 
 ## Objetivo del producto
 

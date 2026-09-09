@@ -16,11 +16,16 @@ Esta carpeta es la fuente de verdad de la arquitectura objetivo, el alcance y el
 10. [Equipo y responsabilidades](10-equipo-y-responsabilidades.md)
 11. [Flujo Git y estrategia de ramas](11-flujo-git-y-ramas.md)
 12. [Entidades de base de datos y DDL de ejemplo](12-entidades-bd-ejemplo.md)
-13. [Verificación de la interfaz en Google Stitch](13-verificacion-stitch.md)
+13. [Migraciones ejecutables, configuración y pruebas](../database/README.md)
+14. [Verificación de la interfaz en Google Stitch](13-verificacion-stitch.md)
 
 ## Regla de alcance
 
-La primera entrega del repositorio publica documentación, diseño y criterios verificables. Los proyectos ejecutables, endpoints, migraciones y flujos productivos se incorporarán mediante las ramas y pull requests definidos en este mismo directorio.
+La documentación describe la arquitectura objetivo; no implica que todos sus flujos estén implementados.
+Al 9 de septiembre de 2026 existen la fundación Ktor y las migraciones Flyway y pruebas reales
+de PostgreSQL/PostGIS, integradas en `develop` mediante el [PR #6](https://github.com/Jquincal/Mapa-Urbano/pull/6).
+El estado detallado y las limitaciones están en [estado y alcance](00-estado-y-alcance.md).
+Los flujos productivos se incorporan mediante las ramas y pull requests definidos en este directorio.
 
 ## Revisión ciudadana de Stitch — septiembre 2026
 

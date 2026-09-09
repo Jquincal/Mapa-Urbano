@@ -1,6 +1,10 @@
 # Backend Ktor
 
-Base ejecutable del monolito modular de Mapa Urbano. En esta etapa están creados el proyecto Gradle, los módulos y el registro de rutas; todavía no se implementaron reglas de negocio, autenticación ni persistencia.
+Base ejecutable del monolito modular de Mapa Urbano. Están creados el proyecto Gradle, los módulos, el registro de rutas y las migraciones de base de datos. Siguen pendientes las reglas de negocio, la autenticación y los repositorios que conectarán la API con la persistencia.
+
+El esquema ya dispone de migraciones Flyway y pruebas de integración PostgreSQL/PostGIS.
+La conexión de los casos de uso a la base sigue pendiente. Ver [operación de la base](../database/README.md)
+para configurar el entorno y ejecutar `./gradlew migrateDatabase` antes del despliegue.
 
 ## Tecnologías
 
@@ -18,6 +22,9 @@ Desde este directorio:
 ./gradlew test
 ./gradlew run
 ```
+
+`./gradlew check` ejecuta además las pruebas de base con Testcontainers y requiere Docker.
+Para ejecutarlas por separado: `./gradlew integrationTest`.
 
 El servidor escucha por defecto en `http://localhost:8080`. Puede cambiarse el puerto mediante la variable de entorno `PORT`.
 

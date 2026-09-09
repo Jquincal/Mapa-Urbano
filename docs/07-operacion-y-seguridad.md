@@ -92,6 +92,13 @@ Objetivos propuestos, pendientes de aprobación:
 
 Un backup no se considera válido hasta restaurarlo. El runbook debe incluir credenciales, orden de recuperación, migraciones y verificación de integridad.
 
+Avance de MU-205: CI ejecuta `pg_dump` y `pg_restore` sobre bases descartables de
+PostgreSQL/PostGIS y verifica datos binarios e historial de Flyway. También comprueba que
+una migración fallida revierta sus cambios sin dejar tablas parciales. Esto valida el
+mecanismo con datos sintéticos; quedan pendientes backups administrados, cifrado,
+restauración de staging y mediciones de RPO/RTO con volumen representativo.
+Consultar [migraciones y pruebas](../database/README.md) para repetir la verificación.
+
 ## Observabilidad
 
 ### Métricas

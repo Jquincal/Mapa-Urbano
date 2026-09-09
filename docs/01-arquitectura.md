@@ -184,6 +184,13 @@ La terminación TLS puede estar en el proxy o en la plataforma de despliegue. El
 - Migraciones versionadas ejecutadas antes de habilitar una nueva versión del backend.
 - Configuración por variables de entorno o secreto administrado; ningún secreto en el repositorio.
 
+Implementación de MU-205: las migraciones canónicas de `database/migrations` se empaquetan
+en `db/migration` del backend. `./gradlew migrateDatabase` ejecuta Flyway sobre una base
+previamente aprovisionada con las variables `DATABASE_JDBC_URL`, `DATABASE_USER` y
+`DATABASE_PASSWORD`. Se ejecuta antes de habilitar el servicio; no se invoca desde las rutas HTTP.
+Los repositorios y la comprobación real de readiness siguen pendientes. Ver el
+[procedimiento de migración y verificación](../database/README.md).
+
 ## Límites intencionales
 
 - El backend no contiene lógica de presentación de Compose.

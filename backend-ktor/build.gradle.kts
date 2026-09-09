@@ -59,7 +59,29 @@ dependencies {
 }
 
 tasks.test {
-    useJUnitPlatform()
+    useJUnitPlatform { excludeTags("database") }
+}
+
+tasks.processResources {
+    from("../database/migrations") { into("db/migration") }
+}
+
+val integrationTest by tasks.registering(Test::class) {
+    description = "Verifica migraciones y restricciones sobre PostgreSQL/PostGIS real (requiere Docker)."
+    group = "verification"
+    testClassesDirs = sourceSets.test.get().output.classesDirs
+    classpath = sourceSets.test.get().runtimeClasspath
+    useJUnitPlatform { includeTags("database") }
+    shouldRunAfter(tasks.test)
+}
+
+tasks.check { dependsOn(integrationTest) }
+
+tasks.register<JavaExec>("migrateDatabase") {
+    description = "Aplica Flyway a la base aprovisionada indicada por DATABASE_JDBC_URL, DATABASE_USER y DATABASE_PASSWORD."
+    group = "database"
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass.set("com.mapaurbano.database.DatabaseMigrationsKt")
 }
 
 ktor {

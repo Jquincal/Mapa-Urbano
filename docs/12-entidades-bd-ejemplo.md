@@ -4,6 +4,11 @@
 
 Este documento propone las entidades mínimas para el MVP de Mapa Urbano y muestra un DDL inicial de referencia. No reemplaza una migración revisada: Aldana y Juan deben convertirlo en migraciones versionadas y pruebas de integración.
 
+Las [migraciones ejecutables](../database/migrations) y su [procedimiento de verificación](../database/README.md)
+implementan este contrato. V1 agrega también los triggers de `updated_at` y el índice de
+equipo/responsable; V2 carga las seis categorías iniciales. El SQL siguiente conserva su
+carácter de ejemplo y no debe ejecutarse para actualizar una base existente.
+
 ## Entidades principales
 
 | Entidad | Propósito | Relaciones principales |
@@ -268,6 +273,9 @@ CREATE TABLE report_assignments (
 CREATE UNIQUE INDEX report_assignments_one_active_uq
     ON report_assignments (report_id)
     WHERE unassigned_at IS NULL;
+
+CREATE INDEX report_assignments_target_idx
+    ON report_assignments (team_id, responsible_admin_user_id);
 
 CREATE TABLE audit_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

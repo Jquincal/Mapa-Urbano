@@ -1,9 +1,9 @@
 # Checklist de inicio
 
-## Avance verificado al 8 de septiembre de 2026
+## Avance verificado al 9 de septiembre de 2026
 
 MU-205 está implementada y probada en el [PR #6](https://github.com/Jquincal/Mapa-Urbano/pull/6),
-pendiente de revisión y fusión. Estas comprobaciones corresponden al esquema y CI:
+ya integrado en `develop`. Estas comprobaciones corresponden al esquema y CI:
 
 - [x] V1 crea PostGIS, las doce tablas y los índices requeridos.
 - [x] V2 carga las seis categorías y conserva datos al repetirse.
@@ -35,7 +35,7 @@ no completa autenticación, endpoints, despliegue ni recuperación de staging.
 1. Congelar contratos de datos y API.
 2. Crear el repositorio dentro de la carpeta del proyecto.
 3. Configurar Ktor, Docker, health checks y configuración segura.
-4. Revisar e integrar MU-205: migraciones PostgreSQL/PostGIS y seeds implementados y probados.
+4. Aplicar las migraciones PostgreSQL/PostGIS y seeds de MU-205, ya integrados y probados.
 5. Implementar registro, sesión revocable de vecinos y `Mis reportes`.
 6. Implementar los modos de alta `account` y `anonymous`.
 7. Integrar `report_images` y el endpoint binario.
@@ -69,7 +69,23 @@ no completa autenticación, endpoints, despliegue ni recuperación de staging.
 ## Entregables de la próxima iteración
 
 1. Contrato API aprobado, incluyendo ejemplos y códigos de error.
-2. Revisar y fusionar MU-205; conectar repositorios y readiness real al esquema versionado.
+2. Conectar repositorios y readiness real al esquema versionado de MU-205.
 3. Decisión documentada del SDK de mapas Android.
 4. Wireframes revisados con resultados de pruebas rápidas.
 5. Priorizar los pendientes de H1 (Docker y configuración) y los casos de uso persistentes de H2.
+
+## Aceptación de la interfaz de Stitch y futura implementación Android
+
+- [x] Referencia visual y decisiones de alcance documentadas, sin ampliar el MVP.
+- [x] Matriz de acciones, destinos, retornos, datos conservados y API definida.
+- [x] Originales identificados y capturas versionadas; resultados separados de afirmaciones del generador.
+- [ ] Resolver todas las limitaciones pendientes del [informe](13-verificacion-stitch.md) antes de declarar el prototipo conectado.
+- [ ] Verificar todas las rutas y retornos en Android, incluidos login, registro, perfil, detalle y selector de ubicación.
+- [ ] Probar borrador conservado/descartado, sesión vencida y cuenta/anónimo sin asociación accidental.
+- [ ] Probar scroll con teclado real, altura reducida, 360/390 dp, texto 200% y movimiento reducido.
+- [ ] Confirmar que los últimos campos, acciones, FAB y cierres de diálogos son alcanzables.
+- [ ] Validar un archivo, reemplazo, 5 MB, tipo/firma inválida y permisos denegados en dispositivo y servidor.
+- [ ] Verificar código opaco solo anónimo, mismo reporte en detalle/confirmación y copia/compartir sin éxito falso.
+- [ ] Cerrar contrato de idempotencia antes de cualquier reenvío automático tras resultado incierto.
+- [ ] Sustituir ejemplos municipales por contenido/contacto/área aprobados antes de producción.
+- [ ] Completar pruebas REST/WS y fallos reales; las simulaciones de Stitch no acreditan esos casos.

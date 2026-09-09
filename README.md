@@ -51,13 +51,14 @@ Mapa Urbano/
 11. [Equipo y responsabilidades](docs/10-equipo-y-responsabilidades.md)
 12. [Flujo Git y estrategia de ramas](docs/11-flujo-git-y-ramas.md)
 13. [Entidades de base de datos y DDL de ejemplo](docs/12-entidades-bd-ejemplo.md)
+14. [Verificación de la interfaz en Google Stitch](docs/13-verificacion-stitch.md)
 
 La fuente de verdad son los archivos Markdown dentro de `docs/`. Los PDF de trabajo y exportaciones locales no se versionan.
 
 ## Estado actual
 
-Actualizado al 8 de septiembre de 2026. El esquema y sus pruebas están implementados en
-el [PR #6 — MU-205](https://github.com/Jquincal/Mapa-Urbano/pull/6), pendiente de revisión y fusión en `develop`.
+Actualizado al 9 de septiembre de 2026. El esquema y sus pruebas del
+[PR #6 — MU-205](https://github.com/Jquincal/Mapa-Urbano/pull/6) ya están integrados en `develop`.
 
 | Área | Estado |
 |---|---|
@@ -65,7 +66,7 @@ el [PR #6 — MU-205](https://github.com/Jquincal/Mapa-Urbano/pull/6), pendiente
 | Arquitectura objetivo | Documentada |
 | Contrato inicial de datos y API | Documentado, pendiente de aprobación |
 | Mockups de interfaces | Incluidos |
-| Diseño de interfaz | Documentado mediante mockups |
+| Diseño de interfaz | Referencia Stitch y comportamiento MVP documentados; ver informe de verificación |
 | Fundación ejecutable del backend y rutas base | Completa |
 | Esquema PostgreSQL/PostGIS y categorías iniciales | Implementados en V1/V2 de Flyway; probados en CI |
 | Integridad, rollback y restauración de binarios | Verificados con Testcontainers en un entorno descartable |
@@ -76,3 +77,7 @@ el [PR #6 — MU-205](https://github.com/Jquincal/Mapa-Urbano/pull/6), pendiente
 Consultar [estado y próximos pasos](docs/00-estado-y-alcance.md),
 [arranque del backend](backend-ktor/README.md) y
 [migraciones y pruebas de la base](database/README.md).
+
+## Revisión ciudadana de Stitch — septiembre 2026
+
+La documentación incorpora el inventario visual y la navegación del MVP. Consultar [resultados, capturas y limitaciones del prototipo](docs/13-verificacion-stitch.md) antes de implementar. Las pantallas generadas no acreditan por sí solas conexiones funcionales ni pruebas Android.

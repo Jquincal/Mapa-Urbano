@@ -6,7 +6,7 @@ Construir un MVP operable con Android, panel web Angular y backend compartido, m
 
 Las horas son estimaciones iniciales. Cada tarea está dimensionada para una entrega de 2 a 8 horas y debe recalibrarse después de cerrar las decisiones abiertas.
 
-## Avance al 8 de septiembre de 2026
+## Avance al 9 de septiembre de 2026
 
 Las tablas de fases conservan el plan y sus criterios de aceptación. El avance verificado es:
 
@@ -19,7 +19,7 @@ Las tablas de fases conservan el plan y sus criterios de aceptación. El avance 
 | H7 — Calidad y operación | CI con Testcontainers, rollback y restauración de datos sintéticos. | Staging, backups administrados y medición con datos representativos. |
 
 El esquema y sus pruebas pertenecen a [MU-205 / PR #6](https://github.com/Jquincal/Mapa-Urbano/pull/6),
-pendiente de revisión y fusión. Ningún hito completo se da por terminado solo por disponer de las tablas.
+ya integrado en `develop`. Ningún hito completo se da por terminado solo por disponer de las tablas.
 Ver [estado y evidencia](00-estado-y-alcance.md#estado-de-implementación-y-evidencia).
 
 ## Hitos
@@ -161,3 +161,19 @@ Reportes + commit confirmado ──→ Eventos ──→ WebSocket
 ## Reserva de planificación
 
 Agregar 20–30% de buffer sobre las estimaciones después de validar proveedor de mapas, capacidad de PostgreSQL, autenticación y política de datos.
+
+## Criterios adicionales del Hito H5 tras revisión Stitch
+
+La [especificación de navegación](05-ux-e-interfaces.md) y el [informe de Stitch](13-verificacion-stitch.md) complementan las tareas Android; las pantallas generadas no adelantan su estado a implementado.
+
+| Trabajo | Dependencia | Criterio de salida |
+|---|---|---|
+| Router y restauración de estado | UX-01/02 y ADR-013 | Todas las pantallas accesibles, retorno correcto, filtros/scroll/borrador restaurados. |
+| Acceso opcional con destino pendiente | API de usuarios | Login/Registro/expiración vuelven al origen sin transformar `account` en anónimo. |
+| Ubicación y evidencia | SDK y media | Confirmar/cancelar ubicación; una foto válida, reemplazo, permisos denegados sin bloqueo. |
+| Alta y confirmación coherentes | API de reportes | Mismo reporte en confirmación/detalle; sin doble toque ni reenvío automático tras timeout. |
+| Scroll y animaciones | Pantallas Compose | 360/390 dp, teclado real, texto 200%, horizontal y movimiento reducido sin acciones tapadas. |
+| Funciones futuras | Alcance vigente | Todos los controles fuera MVP abren aviso con retorno sin llamadas ni éxitos falsos. |
+| Prueba integral sobre dispositivo | H2/H3/H5 | Recorridos de la matriz completados contra backend, no solo contra fixtures. |
+
+Las observaciones que el informe marque pendientes deben resolverse antes de aceptar H5. La revisión del panel administrativo y sus hitos se conserva.

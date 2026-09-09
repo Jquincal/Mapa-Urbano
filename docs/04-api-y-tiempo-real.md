@@ -234,3 +234,21 @@ Tipos mínimos: `connected`, `report.created`, `report.updated`, `report.assignm
 - Validación de `Origin`/`Host` en WebSocket cuando corresponda.
 - `requestId` en logs y respuestas para soporte.
 - No registrar cuerpos completos de reportes ni códigos de seguimiento.
+
+## Correspondencia con la interfaz Stitch — 2026-09-08
+
+Esta revisión **no añade endpoints ni cambia el esquema persistente**. La [matriz de UX](05-ux-e-interfaces.md) asigna cada acción al contrato existente. Un nombre, campo o botón del mockup no autoriza ampliar la API.
+
+- Registro sigue recibiendo solo `email`, `displayName`, `password`. No enviar DNI, teléfono, distrito ni avatar; no afirmar que se envió correo de verificación.
+- El selector visual Guardar en mi cuenta / Reportar de forma anónima se traduce a `submissionMode=account|anonymous`, nunca a los nombres internos del HTML (`vinculada`, `anonima`). No enviar `userId`.
+- Los estados visibles Pendiente / En proceso / Resuelto corresponden a `pending`, `in_progress`, `resolved`; En camino o Programado no son estados nuevos.
+- `id` identifica el reporte; `trackingCode` es una credencial opaca independiente. El código ilustrativo de Stitch no fija una longitud, alfabeto ni entropía de producción. El cliente no valida mediante un patrón de tres letras y cinco números ni fabrica códigos.
+- El alta admite una única parte `photo` opcional de hasta 5 MB; el selector reemplaza la imagen anterior. El máximo 500 caracteres que aparece en el mockup es ilustrativo hasta cerrar límites compartidos de validación.
+- El detalle de Mapa usa la API pública. El listado y detalle propio usan las rutas `/users/me/reports`; no requieren un código. Nunca mostrar nombres de autores, responsables ni notas internas en las vistas públicas.
+- Búsqueda visual se aplica a los resultados ya cargados; no se promete búsqueda global ni se inventan parámetros de API. Para mapa, estado y categoría conservan los parámetros documentados. Antes de implementar paginación privada, cerrar el DTO y cursor común con backend.
+- Datos como tiempo medio de respuesta, eficacia barrial, reputación, votos, actas o cuadrillas GPS no existen en los contratos ciudadanos. No consumir endpoints administrativos desde Android para completar esos widgets.
+- Las notificaciones push siguen fuera de alcance. REST/WS actualiza estado durante el uso de la app; no equivale a una suscripción push ni permite recuperar un código anónimo perdido.
+- El cliente evita doble envío mientras una petición está pendiente. **El POST de alta aún no tiene contrato de idempotencia**: ante timeout con resultado incierto no reintentar automáticamente ni afirmar que falló. Cerrar esta decisión antes de habilitar reintentos automáticos.
+- El borrador, posición de scroll, origen de navegación y selección temporal de mapa son estado del cliente. No enviarlos como nuevos campos del contrato.
+
+Antes de implementar deben cerrarse los límites de contraseña/textos, normalización y formato definitivo del código, DTOs de listados/historial y reglas de área geográfica. Son decisiones pendientes del contrato existente, no prestaciones completadas por esta revisión.

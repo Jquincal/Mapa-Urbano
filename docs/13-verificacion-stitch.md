@@ -52,7 +52,7 @@ Estas medidas validan el formulario en web. **No acreditan todas las pantallas, 
 
 El solicitante autorizó retirar pantallas y paneles que dejen de ser útiles **una vez terminadas las correcciones**. Esa condición todavía no se cumple; no se eliminaron pantallas en esta revisión. `3ea7ef6...` es duplicado exacto de `2f6b151...`; ambos son candidatos identificados para retirar tras aceptar su reemplazo. Las versiones anteriores y originales no se incorporan al flujo vigente por su presencia en el lienzo.
 
-El MCP disponible permite generar/editar diseños, pero no eliminar pantallas individuales. La sesión web comprobada presenta el proyecto compartido con «Remix», sin controles de edición. Para completar la limpieza se necesita acceso de edición al lienzo, verificar qué revisiones fueron sustituidas y actualizar este inventario después de retirarlas. Las capturas históricas en Git preservan la trazabilidad.
+El MCP disponible permite generar/editar diseños, pero no eliminar pantallas individuales. El 9 de septiembre se resolvió el acceso web al iniciar sesión con la cuenta propietaria: el lienzo muestra controles de edición y una acción **Eliminar**. El visor **Ver el código** permanece de solo lectura; intentar escribir muestra «Cannot edit in read-only editor». Las correcciones se solicitan mediante Stitch y deben verificarse sobre su resultado. La limpieza queda condicionada a aceptar el reemplazo, no al acceso a la cuenta. Las capturas históricas en Git preservan la trazabilidad.
 
 ## Historial de la primera revisión — 8 de septiembre de 2026
 

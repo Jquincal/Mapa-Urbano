@@ -26,6 +26,23 @@ body:
     validations:
       required: true
   - type: textarea
+    id: owners
+    attributes:
+      label: Responsables y revisores
+      description: Nombres de quienes implementan, acompañan y revisan el cierre.
+      placeholder: |
+        Responsables:
+        Revisión:
+    validations:
+      required: true
+  - type: textarea
+    id: deliverable
+    attributes:
+      label: Entregable verificable
+      description: Código, documento, interfaz o procedimiento que permitirá comprobar el resultado.
+    validations:
+      required: true
+  - type: textarea
     id: acceptance
     attributes:
       label: Criterios de aceptación
@@ -40,3 +57,5 @@ body:
     attributes:
       label: Dependencias y riesgos
       description: Contratos, migraciones, permisos u otras tareas necesarias.
+    validations:
+      required: true

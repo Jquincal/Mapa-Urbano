@@ -6,6 +6,16 @@
 
 - Issue: MU-
 - Área: <!-- android | backend | database | web | devops | docs -->
+- Responsables:
+- Revisores:
+
+## Dependencias
+
+<!-- Issues, contratos, migraciones o decisiones necesarias. Usa "Ninguna" cuando corresponda. -->
+
+## Entregable y criterio de finalización
+
+<!-- Indica qué resultado verificable entrega este PR y qué condición permite cerrarlo. -->
 
 ## Cambios principales
 
@@ -26,6 +36,7 @@
 ## Checklist
 
 - [ ] Cumple los criterios de aceptación.
+- [ ] El issue, los responsables, las dependencias y el entregable están identificados.
 - [ ] Agregué o actualicé pruebas relevantes.
 - [ ] Actualicé documentación/contratos si corresponde.
 - [ ] No incluí secretos, datos reales, builds, dependencias ni PDF.

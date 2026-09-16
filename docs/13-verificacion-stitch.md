@@ -1,6 +1,60 @@
 # Verificación de la interfaz en Google Stitch
 
-## Resultado de la revisión
+## Resultado vigente — comprobado el 9 de septiembre de 2026
+
+La revisión funcional más avanzada recuperada es **`66cfe9c846d34873b347ed0032dacacc`**, «MuniReport: Prototipo Interactivo (Revisión Quirúrgica Final)», del [proyecto Mapa-Urbano](https://stitch.withgoogle.com/projects/12550160159359787648). **Todavía no satisface la aceptación completa**, especialmente la fidelidad a las pantallas originales, las salidas de Confirmación, los retornos de acceso y la conservación explícita de la modalidad.
+
+Tras la solicitud de volver a intentar la revisión, el MCP generó `2f6b151588e44d7fbdc5d32ba2efb39c` y luego `66cfe9c846d34873b347ed0032dacacc`. La primera incorporó las ocho pantallas principales más Lista, pero la segunda navegación rompía el encabezado, Lista apuntaba a un ID inexistente y los marcadores no se inicializaban. La segunda corrigió esos bloqueos y añadió código aleatorio, fotografía y listado propio. Una corrección posterior volvió a responder «The service is currently unavailable»; la lectura posterior no acreditó que esos pendientes se hubieran resuelto.
+
+También se encontró `3ea7ef6c99bb428f84d9962397e48d7d`, «MuniReport Prototipo Unificado (Revisión Final)». Su HTML es idéntico byte a byte al de `2f6b151588e44d7fbdc5d32ba2efb39c` (SHA-256 `e55d0871e2d0f9e751416232557d922f5d4838414d33992dd3e4a17aa9be851d`). No constituye una corrección adicional ni debe elegirse por su título.
+
+### Evidencia de la revisión quirúrgica
+
+Las pruebas funcionales se ejecutaron sobre el HTML exportado sin modificar, con datos ficticios en memoria. Se recorrió la interfaz y se repitieron los casos de datos/fotografía en Chromium. Las dimensiones de las pruebas de scroll se comprobaron mediante `innerWidth`/`innerHeight`, sin inferirlas del tamaño solicitado al navegador integrado.
+
+| Caso | Resultado comprobado en `66cfe9...` |
+|---|---|
+| Inicio y Lista | Tres marcadores al cargar y tres reportes en Lista. |
+| Navegación consecutiva | Mapa → Lista → Reportar → Seguimiento → Mis reportes → Login ↔ Registro, sin el error del encabezado anterior. |
+| Alta incompleta | Enviar permanece deshabilitado con formulario vacío. Login vacío muestra error. |
+| Cancelar ubicación | Conserva el texto previo del borrador; esto no acredita coordenadas persistidas. |
+| Dos altas anónimas | Códigos diferentes; consultar el primero después de crear el segundo devuelve el primer reporte. |
+| Código inválido | Muestra error y sustituye el resultado anterior. La entrada vacía sigue pendiente. |
+| Cuenta y listado propio | Tras entrar, los dos anónimos no aparecen; una nueva alta de cuenta aparece sola en Mis reportes y su confirmación oculta el código. |
+| Identidad tras alta de cuenta | El código del primer anónimo sigue devolviendo ese reporte después de la nueva alta de cuenta. |
+| Foto | Rechaza `text/plain` y una imagen declarada mayor a 5 MB; una PNG pequeña muestra previsualización. La comprobación de firma de archivo pertenece al servidor. |
+| Errores JavaScript | Ningún error de ejecución en los recorridos anteriores. Esto no cubre acciones pendientes o avisos nativos. |
+
+| Formulario, tras desplazar al final | Área de scroll | Borde inferior de Enviar | Inicio de barra inferior | Resultado |
+|---|---|---:|---:|---|
+| 360 × 500 CSS px | 955 px de contenido / 500 px visibles | 364 px | 420 px | Botón alcanzable, sin desbordamiento horizontal |
+| 390 × 844 CSS px | 955 px de contenido / 844 px visibles | 708 px | 764 px | Botón alcanzable, sin desbordamiento horizontal |
+
+Estas medidas validan el formulario en web. **No acreditan todas las pantallas, teclado Android real, texto al 200% ni todos los diálogos**; esos casos conservan su estado pendiente.
+
+![Revisión quirúrgica recuperada de Stitch](assets/interfaces/stitch-2026-09-08/66cfe9c846d34873b347ed0032dacacc-revision-quirurgica.png)
+
+![Formulario al final del scroll, 360 × 500](assets/interfaces/stitch-2026-09-08/66cfe9-formulario-360x500.png)
+
+![Formulario al final del scroll, 390 × 844](assets/interfaces/stitch-2026-09-08/66cfe9-formulario-390x844.png)
+
+### Pendientes que impiden aceptar la revisión
+
+1. **Distribución original:** Login, Registro, Perfil, Confirmación y formulario siguen simplificados. Se perdieron bloques de bienvenida, etiquetas e iconos, tarjetas de modalidad, grilla de categorías, estructura de comprobante, preferencias e historial. Mantener la paleta no equivale a conservar la composición. Las ocho pantallas de origen siguen siendo la referencia visual.
+2. **Modalidad y acceso:** la opción de cuenta está deshabilitada para invitados; `updateHeaderAuth` restablece la modalidad al navegar. Avatar invitado conserva el origen en vez de Perfil, Registro termina en Mapa y no hay diálogo Conservar/Descartar borrador.
+3. **Confirmación y retorno:** solo ofrece Mapa y copiar; faltan Seguimiento precargado o Mis reportes según modo y Compartir. El historial conserva el formulario consumido. No hay verificación integral de restauración de filtros, selección y scroll al volver.
+4. **Código:** aunque aleatorio e independiente del ID, también se genera para altas de cuenta y la consulta no exige modalidad anónima. Faltan normalización de guiones/espacios y error al consultar vacío. Los 48 bits de la demostración no definen la entropía exigida al backend.
+5. **Ubicación y filtros:** mover el pin solo modifica su posición visual; Confirmar escribe un texto fijo. La búsqueda local funciona, pero no hay filtros combinados por estado y categoría ni gestión completa de resultados vacíos.
+6. **Avisos y errores:** copiar usa un `alert` después de escribir y no maneja rechazo; no hay Compartir ni Pegar completos. Ayuda tiene una vista sin acceso visible y las funciones de red/sesión muestran alertas, sin simular el fallo del envío. Desactivar no explica que conserva reportes y solo cierra la sesión de demostración.
+7. **Renderizado y accesibilidad:** descripciones y otros textos se interpolan con `innerHTML`; deben insertarse como texto. Movimiento reducido cubre solo dos animaciones, no todas las transiciones. Falta verificar scroll universal, foco, Escape, teclado y texto ampliado.
+
+### Limpieza del lienzo
+
+El solicitante autorizó retirar pantallas y paneles que dejen de ser útiles **una vez terminadas las correcciones**. Esa condición todavía no se cumple; no se eliminaron pantallas en esta revisión. `3ea7ef6...` es duplicado exacto de `2f6b151...`; ambos son candidatos identificados para retirar tras aceptar su reemplazo. Las versiones anteriores y originales no se incorporan al flujo vigente por su presencia en el lienzo.
+
+El MCP disponible permite generar/editar diseños, pero no eliminar pantallas individuales. El 9 de septiembre se resolvió el acceso web al iniciar sesión con la cuenta propietaria: el lienzo muestra controles de edición y una acción **Eliminar**. El visor **Ver el código** permanece de solo lectura; intentar escribir muestra «Cannot edit in read-only editor». Las correcciones se solicitan mediante Stitch y deben verificarse sobre su resultado. La limpieza queda condicionada a aceptar el reemplazo, no al acceso a la cuenta. Las capturas históricas en Git preservan la trazabilidad.
+
+## Historial de la primera revisión — 8 de septiembre de 2026
 
 Fecha: **8 de septiembre de 2026**. Proyecto: [Mapa-Urbano en Google Stitch](https://stitch.withgoogle.com/projects/12550160159359787648), ID `12550160159359787648`.
 
@@ -22,7 +76,10 @@ Una tercera corrección dirigida exclusivamente a esos defectos fue enviada medi
 | Confirmación y seguimiento | `bf44556d9a3b4320aad162e6ff501355` | Conserva la vista de seguimiento; aún fabrica un código al fallar Pegado y activa una alerta fuera del MVP. |
 | Login/Registro | `14d8aa06a29045faa384685be02dea3d` | Corrige parte del texto y funciones futuras; no contiene Registro navegable ni retorno interno completo. |
 | Perfil `31d374...` | `2750e200fe8a422f808364a38efb577f` | Conserva estética; acciones sensibles siguen simuladas. |
-| Prototipo anterior `7dceab...` | `4898040798fc4cb48b45f6323ade4390` | Integra siete vistas más Lista; conexión parcial, con defectos detallados abajo. |
+| Prototipo anterior `7dceab...` | `4898040798fc4cb48b45f6323ade4390` | Integra siete vistas contando Lista; conexión parcial, con defectos históricos detallados abajo. |
+| Reintento unificado | `2f6b151588e44d7fbdc5d32ba2efb39c` | Ocho pantallas más Lista, con bloqueos de router; [captura](assets/interfaces/stitch-2026-09-08/2f6b151588e44d7fbdc5d32ba2efb39c-revision-unificada.png). |
+| Copia del reintento | `3ea7ef6c99bb428f84d9962397e48d7d` | Mismo HTML y captura que `2f6b151...`; no se duplica el archivo de imagen en Git. |
+| Corrección quirúrgica | `66cfe9c846d34873b347ed0032dacacc` | Mejoras y pendientes comprobados en el resultado vigente de este informe. |
 
 ![Mapa antes de la corrección](assets/interfaces/stitch-2026-09-08/mapa-antes.png)
 
@@ -32,7 +89,7 @@ Una tercera corrección dirigida exclusivamente a esos defectos fue enviada medi
 
 Las capturas completas anteriores y posteriores están en [`assets/interfaces/stitch-2026-09-08`](assets/interfaces/stitch-2026-09-08/). Las imágenes documentan composición visual; el HTML no se versiona porque es una exportación temporal de inspección y depende de recursos externos.
 
-## Matriz de comprobación
+## Matriz histórica de `489804...`
 
 | Caso | Resultado | Evidencia / consecuencia |
 |---|---|---|
@@ -71,4 +128,4 @@ La [matriz completa de UX](05-ux-e-interfaces.md#matriz-de-acciones-e-integraci�
 
 ## Condición para considerar el diseño conectado
 
-Una revisión posterior de Stitch o la implementación Android solo puede marcarse completa cuando las ocho vistas y todos los retornos de la matriz funcionen sin simulaciones, el código sea independiente del ID, no haya autor público, el scroll alcance cada acción y las funciones futuras no cambien estado. La revisión debe volver a inspeccionarse y probarse; el título “Conectado” no constituye evidencia.
+Una revisión posterior de Stitch o la implementación Android solo puede marcarse completa cuando las ocho vistas y todos los retornos de la matriz funcionen sin enlaces simulados, el código sea independiente del ID y exclusivo de anónimos, no haya autor público, el scroll alcance cada acción y las funciones futuras no cambien estado. La autenticación y el backend de demostración del prototipo deben seguir identificados como simulaciones. La revisión debe volver a inspeccionarse y probarse; el título “Conectado” no constituye evidencia.

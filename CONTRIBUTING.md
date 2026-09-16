@@ -3,8 +3,8 @@
 ## Antes de comenzar
 
 1. Lee el [alcance](docs/00-estado-y-alcance.md), la [arquitectura](docs/01-arquitectura.md) y el [flujo Git](docs/11-flujo-git-y-ramas.md).
-2. Confirma que la tarea tiene identificador `MU-<número>`, responsable y criterios de aceptación.
-3. Verifica dependencias con contratos, migraciones u otras tareas.
+2. Confirma que existe un issue `MU-<número>` con responsables y criterios de aceptación.
+3. Registra dependencias, entregable verificable y criterio de finalización antes de crear la rama.
 4. Nunca subas secretos, configuraciones locales, builds, dependencias instaladas ni PDF de trabajo.
 
 ## Flujo básico
@@ -23,6 +23,8 @@ git merge origin/develop
 python3 scripts/check_docs.py
 git diff --check
 ```
+
+Una rama corresponde a una sola tarea. Después de fusionarla, no se reutiliza para otro cambio.
 
 ## Commits
 
@@ -47,11 +49,13 @@ docs(architecture): documenta control de concurrencia
 
 - Destino normal: `develop`.
 - Una tarea o cambio coherente por pull request.
+- Enlaza el issue y nombra responsables, dependencias, entregable y criterio de finalización.
 - Incluye cómo probar, capturas para UI y riesgos conocidos.
 - Actualiza documentación cuando cambia comportamiento, contrato o despliegue.
 - Solicita revisión según el área definida en [equipo y responsabilidades](docs/10-equipo-y-responsabilidades.md).
 - No apruebes tu propio cambio.
 - Usa `Squash and merge` para ramas de tarea.
+- Cierra el issue y elimina la rama después de integrar el cambio.
 
 ## Criterio de terminado
 

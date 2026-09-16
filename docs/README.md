@@ -18,13 +18,16 @@ Esta carpeta es la fuente de verdad de la arquitectura objetivo, el alcance y el
 12. [Entidades de base de datos y DDL de ejemplo](12-entidades-bd-ejemplo.md)
 13. [Migraciones ejecutables, configuración y pruebas](../database/README.md)
 14. [Verificación de la interfaz en Google Stitch](13-verificacion-stitch.md)
+15. [Proceso actual y próximos desarrollos](14-proceso-actual-y-proximos.md)
 
 ## Regla de alcance
 
 La documentación describe la arquitectura objetivo; no implica que todos sus flujos estén implementados.
-Al 9 de septiembre de 2026 existen la fundación Ktor y las migraciones Flyway y pruebas reales
+Al 14 de septiembre de 2026 existen la fundación Ktor y las migraciones Flyway y pruebas reales
 de PostgreSQL/PostGIS, integradas en `develop` mediante el [PR #6](https://github.com/Jquincal/Mapa-Urbano/pull/6).
-El estado detallado y las limitaciones están en [estado y alcance](00-estado-y-alcance.md).
+El diseño ciudadano continúa como especificación y prototipo; no existe una aplicación Android implementada.
+El [estado verificable, el proceso y los próximos entregables](14-proceso-actual-y-proximos.md)
+separan código integrado, prototipos y trabajo pendiente.
 Los flujos productivos se incorporan mediante las ramas y pull requests definidos en este directorio.
 
 ## Revisión ciudadana de Stitch — septiembre 2026

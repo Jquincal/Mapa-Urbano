@@ -6,7 +6,7 @@ Construir un MVP operable con Android, panel web Angular y backend compartido, m
 
 Las horas son estimaciones iniciales. Cada tarea está dimensionada para una entrega de 2 a 8 horas y debe recalibrarse después de cerrar las decisiones abiertas.
 
-## Avance al 9 de septiembre de 2026
+## Avance al 14 de septiembre de 2026
 
 Las tablas de fases conservan el plan y sus criterios de aceptación. El avance verificado es:
 
@@ -21,6 +21,15 @@ Las tablas de fases conservan el plan y sus criterios de aceptación. El avance 
 El esquema y sus pruebas pertenecen a [MU-205 / PR #6](https://github.com/Jquincal/Mapa-Urbano/pull/6),
 ya integrado en `develop`. Ningún hito completo se da por terminado solo por disponer de las tablas.
 Ver [estado y evidencia](00-estado-y-alcance.md#estado-de-implementación-y-evidencia).
+
+## Prioridad actual
+
+El primer incremento demostrable cubre alta anónima, código de seguimiento, cambio administrativo
+de estado y consulta posterior. Cuentas, fotografías, asignación, estadísticas y WebSocket continúan
+dentro del MVP, pero no bloquean esa primera demostración.
+
+Los responsables concretos, dependencias y criterios de finalización de los próximos procesos están
+en [proceso actual y próximos desarrollos](14-proceso-actual-y-proximos.md#próximos-procesos).
 
 ## Hitos
 

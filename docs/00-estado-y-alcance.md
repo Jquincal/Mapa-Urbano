@@ -4,7 +4,7 @@
 
 Este documento adapta el documento original **Mapa Colaborativo de Problemas Urbanos v2.0** a la arquitectura solicitada para Mapa Urbano.
 
-Fecha de actualización: 9 de septiembre de 2026.
+Fecha de actualización: 14 de septiembre de 2026.
 
 La carpeta de trabajo se llama `Mapa Urbano`, aunque la ruta solicitada decía `Mapa Urban`. Se trabajó sobre la carpeta existente.
 
@@ -12,6 +12,9 @@ La carpeta de trabajo se llama `Mapa Urbano`, aunque la ruta solicitada decía `
 
 MU-205 está implementada en el [PR #6](https://github.com/Jquincal/Mapa-Urbano/pull/6),
 ya integrado en `develop`. Este estado corresponde a esa entrega, no a un despliegue productivo.
+
+El [proceso actual y los próximos desarrollos](14-proceso-actual-y-proximos.md) concentran
+los responsables, dependencias, entregables, criterios de finalización y evidencia con esta misma fecha de corte.
 
 | Entrega | Estado verificable |
 |---|---|
@@ -31,6 +34,9 @@ base descartable; no acreditan una restauración de staging ni el flujo completo
 El [procedimiento de base de datos](../database/README.md) detalla configuración, pruebas
 y adopción de bases preexistentes. El siguiente paso técnico es conectar la persistencia
 al backend e implementar autenticación y alta de reportes respetando los contratos.
+
+La especificación y el prototipo de Stitch no acreditan una aplicación Android. El
+[PR #9](https://github.com/Jquincal/Mapa-Urbano/pull/9) permanece abierto y tampoco se considera integrado.
 
 ## Objetivo del producto
 

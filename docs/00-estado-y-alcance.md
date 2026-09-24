@@ -4,9 +4,33 @@
 
 Este documento adapta el documento original **Mapa Colaborativo de Problemas Urbanos v2.0** a la arquitectura solicitada para Mapa Urbano.
 
-Fecha de revisión: 31 de agosto de 2026.
+Fecha de actualización: 9 de septiembre de 2026.
 
 La carpeta de trabajo se llama `Mapa Urbano`, aunque la ruta solicitada decía `Mapa Urban`. Se trabajó sobre la carpeta existente.
+
+## Estado de implementación y evidencia
+
+MU-205 está implementada en el [PR #6](https://github.com/Jquincal/Mapa-Urbano/pull/6),
+ya integrado en `develop`. Este estado corresponde a esa entrega, no a un despliegue productivo.
+
+| Entrega | Estado verificable |
+|---|---|
+| Fundación Ktor | Módulos y rutas registrados; liveness responde `200`, readiness `503` y negocio `501`. |
+| V1 — Esquema | Doce tablas, PostGIS, enums, restricciones de autoría e imagen única, índices y triggers de `updated_at`. |
+| V2 — Categorías | Seis categorías documentadas; la carga idempotente conserva personalizaciones. |
+| Ejecución de migraciones | `./gradlew migrateDatabase`, configurado por entorno; clean y baseline automático deshabilitados. |
+| Verificación | Pruebas de rutas y once pruebas de base con Testcontainers, incluyendo rollback y backup/restauración. |
+| API persistente | Pendiente: conexión de repositorios, autenticación, validaciones y casos de uso. |
+| Operación | Pendiente: staging, cuenta de aplicación, backups administrados, mediciones de capacidad y RPO/RTO. |
+
+La [ejecución de CI 34286113649](https://github.com/Jquincal/Mapa-Urbano/actions/runs/34286113649)
+verificó el código de MU-205 en `3d873ec`: backend y documentación aprobados. Los informes
+están disponibles como `backend-test-reports`. Las pruebas usan datos sintéticos y una
+base descartable; no acreditan una restauración de staging ni el flujo completo de fotografías.
+
+El [procedimiento de base de datos](../database/README.md) detalla configuración, pruebas
+y adopción de bases preexistentes. El siguiente paso técnico es conectar la persistencia
+al backend e implementar autenticación y alta de reportes respetando los contratos.
 
 ## Objetivo del producto
 
@@ -144,3 +168,19 @@ La asignación manual y la prioridad operativa sí forman parte del MVP. Se excl
 8. ¿Qué reglas municipales determinarán el uso de `urgent` y las fechas objetivo?
 9. ¿Se exigirá verificar el correo antes de crear reportes registrados?
 10. ¿Qué política de baja, anonimización y retención se aplicará a las cuentas de vecinos?
+
+## Revisión de interfaz Stitch — 2026-09-08
+
+Se adopta la interfaz ciudadana MuniReport del proyecto Stitch Mapa-Urbano como referencia visual, usando Mapa y Mis reportes interactivos. Se conservan estética y alcance del MVP; se autorizan conexiones, retornos, scroll universal, animaciones discretas y correcciones de textos funcionales. Ver [especificación de UX](05-ux-e-interfaces.md) e [informe de verificación](13-verificacion-stitch.md).
+
+No se incorporan login social, biometría, recuperación de contraseña, edición avanzada de perfil, push, votos, actas, telemetría de cuadrillas ni métricas vecinales avanzadas. Sus controles conservan su lugar pero abren un aviso con retorno; no simulan éxito. DNI, teléfono y distrito no se recogen ni exigen. Términos, política municipal, área operativa y contacto de asistencia siguen pendientes de definición; los ejemplos geográficos y 147 no son configuración de producción.
+
+| ID | Requisito de interfaz añadido, sin ampliar API |
+|---|---|
+| UX-01 | Cada pantalla y diálogo permite scroll cuando el contenido desborda, también con teclado y texto ampliado. |
+| UX-02 | Todo destino operativo tiene acceso y retorno interno, conservando filtros, selección, scroll y borrador donde corresponda. |
+| UX-03 | La confirmación y el detalle muestran el mismo reporte seleccionado/creado; código únicamente en anónimos. |
+| UX-04 | Las acciones futuras informan su indisponibilidad; no generan cambios ni éxitos ficticios. |
+| UX-05 | Las transiciones respetan movimiento reducido y no alteran el aspecto de las pantallas. |
+
+La existencia de un diseño o una respuesta de generación no acredita implementación. El estado comprobado del prototipo y los casos Android pendientes están separados en el informe.

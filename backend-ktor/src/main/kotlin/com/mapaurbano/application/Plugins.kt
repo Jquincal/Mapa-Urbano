@@ -1,6 +1,10 @@
 package com.mapaurbano.application
 
+import com.mapaurbano.shared.api.ApiErrorDetail
+import com.mapaurbano.shared.api.respondApiError
 import com.mapaurbano.shared.api.respondInternalServerError
+import com.mapaurbano.shared.domain.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
@@ -31,6 +35,17 @@ fun Application.configurePlugins() {
     }
 
     install(StatusPages) {
+        exception<DomainException> { call, cause ->
+            val status = when (cause) {
+                is NotFoundException -> HttpStatusCode.NotFound
+                is ValidationException -> HttpStatusCode.BadRequest
+                is ConflictException -> HttpStatusCode.Conflict
+                is AuthenticationException -> HttpStatusCode.Unauthorized
+                is AuthorizationException -> HttpStatusCode.Forbidden
+            }
+            val details = cause.details.map { ApiErrorDetail(it.field, it.reason) }
+            call.respondApiError(status, cause.errorCode, cause.message, details)
+        }
         exception<Throwable> { call, cause ->
             applicationLogger.error("Unhandled request failure", cause)
             call.respondInternalServerError()

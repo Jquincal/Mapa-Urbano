@@ -20,7 +20,7 @@ repositories {
     mavenCentral()
 }
 
-val exposedVersion = "1.5.0"
+val exposedVersion = "0.54.0"
 val flywayVersion = "13.2.0"
 val testcontainersVersion = "2.0.5"
 
@@ -34,13 +34,23 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages")
     implementation("io.ktor:ktor-server-websockets")
     implementation("io.ktor:ktor-server-cors")
+    implementation("io.ktor:ktor-server-auth")
+    implementation("io.ktor:ktor-server-rate-limit")
+    implementation("io.ktor:ktor-server-sessions")
+    implementation("io.ktor:ktor-server-csrf")
 
     // Database – Exposed ORM + connection pool
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposedVersion")
     implementation("com.zaxxer:HikariCP:7.0.2")
     implementation("org.postgresql:postgresql:42.7.13")
+
+    // Dependency Injection
+    val koinVersion = "3.5.6"
+    implementation("io.insert-koin:koin-ktor:$koinVersion")
+    implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
     implementation("org.flywaydb:flyway-core:$flywayVersion")
     implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
 

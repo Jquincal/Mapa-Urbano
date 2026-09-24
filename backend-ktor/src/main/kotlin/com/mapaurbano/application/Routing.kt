@@ -1,5 +1,9 @@
 package com.mapaurbano.application
 
+import io.ktor.server.auth.authenticate
+import io.ktor.server.plugins.ratelimit.RateLimitName
+import io.ktor.server.plugins.ratelimit.rateLimit
+
 import com.mapaurbano.assignments.api.assignmentRoutes
 import com.mapaurbano.assignments.api.teamRoutes
 import com.mapaurbano.audit.api.auditRoutes
@@ -24,20 +28,26 @@ fun Application.configureRouting() {
 
         route("/api/v1") {
             publicCategoryRoutes()
-            publicReportRoutes()
-            publicImageRoutes()
+            
+            rateLimit(RateLimitName("public")) {
+                publicReportRoutes()
+                publicImageRoutes()
+            }
+            
             userRoutes()
             webSocketRoutes()
 
-            route("/admin") {
-                adminAuthRoutes()
-                adminReportRoutes()
-                adminImageRoutes()
-                assignmentRoutes()
-                teamRoutes()
-                adminCategoryRoutes()
-                statisticsRoutes()
-                auditRoutes()
+            authenticate("admin-session") {
+                route("/admin") {
+                    adminAuthRoutes()
+                    adminReportRoutes()
+                    adminImageRoutes()
+                    assignmentRoutes()
+                    teamRoutes()
+                    adminCategoryRoutes()
+                    statisticsRoutes()
+                    auditRoutes()
+                }
             }
         }
     }
